@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coach">
+<meta name="theme-color" content="#060608">
+<title>Coach · Harith</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pt:env(safe-area-inset-top,44px);
+  --pb:env(safe-area-inset-bottom,34px);
+  --bg:#060608;
+  --s1:#0e0e14;
+  --s2:#16161f;
+  --s3:#1e1e2a;
+  --brd:rgba(255,255,255,0.07);
+  --brd2:rgba(255,255,255,0.12);
+  --tx:#f0f0f8;
+  --tx2:#8888aa;
+  --tx3:#4a4a66;
+  --swim:#00d4ff;
+  --bike:#ff7240;
+  --run:#00f07a;
+  --rest:#3a3a55;
+  --race:#ffc940;
+  --train:#a78bfa;
+  --r:18px;
+  --tab-h:82px;
+}
+html{background:var(--bg);height:100%}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);color:var(--tx);
+  min-height:100vh;min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── SCROLL CONTAINER ─── */
+.scroller{
+  position:fixed;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+  padding-bottom:calc(var(--tab-h) + 16px);
+}
+
+/* ─── TOP STATUS BAR SPACER ─── */
+.status-bar{height:calc(var(--pt) + 2px);flex-shrink:0}
+
+/* ─── TAB BAR ─── */
+.tabbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:999;
+  height:var(--tab-h);
+  background:rgba(6,6,8,0.82);
+  backdrop-filter:blur(32px) saturate(180%);
+  -webkit-backdrop-filter:blur(32px) saturate(180%);
+  border-top:1px solid var(--brd);
+  display:flex;align-items:flex-start;
+  padding-top:10px;
+  padding-bottom:var(--pb);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:none;border:none;cursor:pointer;
+  padding:6px 4px 0;
+  transition:opacity .15s;
+}
+.tab:active{opacity:.6}
+.tab-icon{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  transition:background .2s,transform .15s;
+}
+.tab.active .tab-icon{
+  background:rgba(255,255,255,0.12);
+  transform:scale(1.08);
+}
+.tab-label{font-size:10px;font-weight:500;color:var(--tx3);letter-spacing:.02em;transition:color .2s}
+.tab.active .tab-label{color:var(--tx)}
+
+/* ─── PAGES ─── */
+.page{display:none;min-height:100vh;padding:0 0 8px}
+.page.active{display:block;animation:fadeUp .25s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ─── TODAY PAGE ─── */
+.hero{
+  position:relative;overflow:hidden;
+  padding:calc(var(--pt) + 20px) 20px 28px;
+  background:linear-gradient(170deg,#0c0c18 0%,#060608 70%);
+}
+.hero-glow{
+  position:absolute;top:-60px;right:-40px;
+  width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,.12),transparent 70%);
+  pointer-events:none;
+}
+.hero-glow2{
+  position:absolute;bottom:-80px;left:-60px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,240,122,.07),transparent 70%);
+  pointer-events:none;
+}
+.hero-greeting{font-size:13px;font-weight:500;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:.95;letter-spacing:.01em;margin-bottom:14px}
+.hero-title span{color:var(--swim)}
+.phase-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--brd2);border-radius:100px;
+  padding:6px 14px;font-size:12px;font-weight:500;color:var(--tx2);
+}
+.phase-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ─── COUNTDOWN PILLS ─── */
+.countdown-row{display:flex;gap:10px;padding:16px 16px 0}
+.cd-pill{
+  flex:1;background:var(--s2);border:1px solid var(--brd);border-radius:16px;
+  padding:14px 16px;position:relative;overflow:hidden;
+}
+.cd-pill::before{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:80px;height:80px;border-radius:50%;
+  opacity:.15;
+}
+.cd-pill.r1::before{background:var(--race)}
+.cd-pill.r2::before{background:var(--swim)}
+.cd-days{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1}
+.cd-pill.r1 .cd-days{color:var(--race)}
+.cd-pill.r2 .cd-days{color:var(--swim)}
+.cd-label{font-size:10px;color:var(--tx3);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.cd-name{font-size:11px;font-weight:600;color:var(--tx2);margin-top:6px}
+
+/* ─── PROGRESS ─── */
+.prog-wrap{margin:16px 16px 0;background:var(--s2);border:1px solid var(--brd);border-radius:16px;padding:16px}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-label{font-size:12px;font-weight:600;color:var(--tx2)}
+.prog-val{font-size:12px;font-weight:700;color:var(--tx)}
+.prog-track{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--swim),var(--run));transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.prog-phases{display:flex;gap:3px;margin-top:8px}
+.prog-phase-seg{height:3px;border-radius:2px;flex:1;opacity:.4}
+
+/* ─── SECTION HEADER ─── */
+.sec{padding:20px 16px 10px;font-size:11px;font-weight:600;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase}
+
+/* ─── WORKOUT CARD ─── */
+.wo-card{
+  margin:0 16px 10px;
+  background:var(--s1);
+  border:1px solid var(--brd);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:transform .12s,border-color .15s;
+  position:relative;
+}
+.wo-card:active{transform:scale(.98)}
+.wo-card.done{opacity:.45}
+.wo-card-inner{display:flex;align-items:center;gap:13px;padding:14px 16px}
+.sport-icon{
+  width:44px;height:44px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.si-swim{background:rgba(0,212,255,.1)}
+.si-bike{background:rgba(255,114,64,.1)}
+.si-run{background:rgba(0,240,122,.1)}
+.si-rest{background:rgba(58,58,85,.25)}
+.si-race{background:rgba(255,201,64,.1)}
+.si-train{background:rgba(167,139,250,.1)}
+.wo-info{flex:1;min-width:0}
+.wo-name{font-size:15px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wo-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+.wo-tag{font-size:11px;color:var(--tx3);font-weight:500}
+.wo-sep{width:3px;height:3px;border-radius:50%;background:var(--tx3)}
+.check-btn{
+  width:30px;height:30px;border-radius:50%;
+  border:2px solid var(--brd2);background:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--tx3);flex-shrink:0;
+  transition:all .2s;
+}
+.check-btn.done-c{background:var(--run);border-color:var(--run);color:#000}
+.wo-accent{
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+  border-radius:var(--r) 0 0 var(--r);
+}
+
+/* ─── SLEEP NUDGE ─── */
+.sleep-nudge{
+  margin:16px 16px 0;
+  background:linear-gradient(135deg,rgba(0,240,122,.07),rgba(0,212,255,.05));
+  border:1px solid rgba(0,240,122,.15);border-radius:16px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+}
+.sleep-icon{font-size:26px}
+.sleep-text .sleep-t{font-size:12px;font-weight:700;color:var(--run)}
+.sleep-text .sleep-s{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.4}
+
+/* ─── WEEKS PAGE ─── */
+.week-list{padding:calc(var(--pt) + 8px) 0 0}
+.week-item{
+  margin:0 16px 8px;
+  background:var(--s1);border:1px solid var(--brd);
+  border-radius:var(--r);overflow:hidden;
+}
+.week-item.current{border-color:var(--swim)}
+.week-hdr{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;
+  cursor:pointer;user-select:none;
+}
+.week-hdr:active{background:rgba(255,255,255,.02)}
+.week-num-badge{
+  font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;
+  color:var(--tx3);min-width:32px;
+}
+.week-item.current .week-num-badge{color:var(--swim)}
+.week-hdr-info{flex:1;min-width:0}
+.week-hdr-phase{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.week-hdr-focus{font-size:13px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.week-hdr-right{text-align:right;flex-shrink:0}
+.week-hrs{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1}
+.week-date-small{font-size:10px;color:var(--tx3);font-weight:500;margin-top:1px}
+.rec-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#ffc940;background:rgba(255,201,64,.1);border:1px solid rgba(255,201,64,.2);border-radius:6px;padding:2px 6px;margin-top:4px}
+
+/* week expand */
+.week-body{display:none;border-top:1px solid var(--brd);padding:12px 16px}
+.week-body.open{display:block}
+.day-block{padding:8px 0;border-bottom:1px solid var(--brd)}
+.day-block:last-child{border-bottom:none}
+.day-lbl{font-size:10px;font-weight:600;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.wo-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border-radius:10px;padding:8px 10px;
+  margin-bottom:4px;cursor:pointer;
+  transition:background .12s;
+}
+.wo-pill:active{background:var(--s3)}
+.wo-pill:last-child{margin-bottom:0}
+.pill-emoji{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.pill-name{flex:1;font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill-dur{font-size:11px;color:var(--tx3);flex-shrink:0}
+.pill-done{font-size:11px;flex-shrink:0;opacity:.6}
+
+/* ─── PHASES PAGE ─── */
+.phases-wrap{padding:calc(var(--pt) + 8px) 16px 0}
+.phase-card{
+  background:var(--s1);border:1px solid var(--brd);border-radius:var(--r);
+  margin-bottom:10px;overflow:hidden;cursor:pointer;
+}
+.phase-top{display:flex;align-items:center;gap:14px;padding:16px}
+.phase-circle{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.phase-info{flex:1;min-width:0}
+.phase-name-txt{font-size:15px;font-weight:700}
+.phase-dates-txt{font-size:11px;color:var(--tx3);margin-top:3px}
+.phase-wks-badge{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  padding:4px 10px;border-radius:8px;flex-shrink:0;
+}
+.phase-detail{display:none;border-top:1px solid var(--brd);padding:14px 16px}
+.phase-detail.open{display:block}
+.phase-focus-txt{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:12px}
+.milestone-pill{
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--s2);border-radius:12px;padding:12px 14px;
+}
+.ms-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ms-text{font-size:12px;color:var(--tx2);line-height:1.5}
+.ms-text strong{color:var(--run)}
+
+/* ─── RACES PAGE ─── */
+.races-wrap{padding:calc(var(--pt) + 8px) 16px 0}
+.race-card{
+  border-radius:20px;overflow:hidden;margin-bottom:12px;
+  position:relative;
+}
+.race-card-bg{
+  padding:22px 20px 20px;position:relative;
+}
+.race-card-bg::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),transparent);
+  pointer-events:none;
+}
+.race-emoji{font-size:32px;margin-bottom:10px;display:block}
+.race-name{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;letter-spacing:.02em}
+.race-countdown-inline{
+  font-size:13px;font-weight:600;margin-top:4px;opacity:.7;
+}
+.race-dists{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.rdist{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.25);border-radius:20px;
+  padding:6px 12px;font-size:13px;font-weight:600;
+  backdrop-filter:blur(8px);
+}
+.strat-section{margin-bottom:10px}
+.strat-hdr{font-size:10px;font-weight:600;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;padding:16px 0 10px}
+.strat-card{
+  background:var(--s1);border:1px solid var(--brd);border-radius:14px;
+  padding:14px 16px;margin-bottom:8px;
+}
+.strat-sport-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.strat-sport-name{font-size:14px;font-weight:700}
+.strat-body{font-size:13px;color:var(--tx2);line-height:1.75}
+.strat-body strong{color:var(--tx);font-weight:600}
+
+/* ─── PROFILE PAGE ─── */
+.profile-wrap{padding:calc(var(--pt) + 8px) 16px 0}
+.profile-hero{
+  background:var(--s1);border:1px solid var(--brd);border-radius:20px;
+  padding:24px 20px;margin-bottom:10px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.profile-hero::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,.08),transparent 70%);
+}
+.profile-av{
+  width:72px;height:72px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--swim),var(--run));
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;position:relative;
+}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.03em}
+.profile-sub{font-size:12px;color:var(--tx3);font-weight:500;margin-top:4px;letter-spacing:.05em}
+.stat4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.stat4-cell{
+  background:var(--s1);border:1px solid var(--brd);border-radius:14px;
+  padding:16px;text-align:center;
+}
+.stat4-v{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1}
+.stat4-l{font-size:10px;color:var(--tx3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.info-block{
+  background:var(--s1);border:1px solid var(--brd);border-radius:16px;
+  padding:16px;margin-bottom:10px;
+}
+.info-block-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--brd);font-size:13px;
+}
+.info-row:last-child{border-bottom:none}
+.info-lbl{color:var(--tx2);font-weight:400}
+.info-val{font-weight:600}
+
+/* ─── MODAL ─── */
+.modal-scrim{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  align-items:flex-end;
+}
+.modal-scrim.open{display:flex;animation:scrimIn .2s ease both}
+@keyframes scrimIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{
+  width:100%;max-height:88dvh;
+  background:var(--s2);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid var(--brd2);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:calc(var(--pb) + 16px);
+  animation:sheetUp .28s cubic-bezier(.32,0,.67,0) both;
+}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:14px auto 6px}
+.sheet-hero{padding:10px 20px 18px;border-bottom:1px solid var(--brd)}
+.sheet-sport-row{display:flex;align-items:center;gap:14px}
+.sheet-sport-badge{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.sheet-title{font-size:19px;font-weight:700;line-height:1.2}
+.sheet-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.sheet-tag{
+  background:rgba(255,255,255,.06);border-radius:8px;
+  padding:3px 10px;font-size:11px;font-weight:600;color:var(--tx2);
+}
+.sheet-body{padding:18px 20px}
+.sheet-desc{font-size:14px;color:var(--tx2);line-height:1.7;margin-bottom:16px}
+.sheet-instructions{
+  background:var(--s3);border-radius:14px;padding:16px;
+  font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--tx);
+}
+.sheet-btn{
+  margin:18px 20px 0;width:calc(100% - 40px);padding:15px;
+  border-radius:14px;border:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.02em;transition:all .15s;
+}
+.sheet-btn.mark{background:var(--run);color:#000}
+.sheet-btn.unmark{background:rgba(255,255,255,.08);color:var(--tx2);border:1px solid var(--brd2)}
+.sheet-btn:active{transform:scale(.97)}
+
+/* ─── UTILS ─── */
+.no-workouts{padding:24px;text-align:center;color:var(--tx3);font-size:14px;line-height:1.7}
+</style>
+</head>
+<body>
+
+<!-- PAGES -->
+<div class="scroller" id="scroller">
+  <div id="p-today" class="page active"></div>
+  <div id="p-weeks" class="page"></div>
+  <div id="p-phases" class="page"></div>
+  <div id="p-races" class="page"></div>
+  <div id="p-profile" class="page"></div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tabbar">
+  <button class="tab active" data-page="today" onclick="nav('today')">
+    <div class="tab-icon">⚡️</div>
+    <div class="tab-label">Today</div>
+  </button>
+  <button class="tab" data-page="weeks" onclick="nav('weeks')">
+    <div class="tab-icon">📅</div>
+    <div class="tab-label">Weeks</div>
+  </button>
+  <button class="tab" data-page="phases" onclick="nav('phases')">
+    <div class="tab-icon">📈</div>
+    <div class="tab-label">Plan</div>
+  </button>
+  <button class="tab" data-page="races" onclick="nav('races')">
+    <div class="tab-icon">🏁</div>
+    <div class="tab-label">Races</div>
+  </button>
+  <button class="tab" data-page="profile" onclick="nav('profile')">
+    <div class="tab-icon">👤</div>
+    <div class="tab-label">Profile</div>
+  </button>
+</div>
+
+<!-- WORKOUT SHEET -->
+<div class="modal-scrim" id="modal-scrim" onclick="closeSheet(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hero">
+      <div class="sheet-sport-row">
+        <div class="sheet-sport-badge" id="sh-badge"></div>
+        <div>
+          <div class="sheet-title" id="sh-title"></div>
+          <div class="sheet-meta" id="sh-meta"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-desc" id="sh-desc"></div>
+      <div class="sheet-instructions" id="sh-instr"></div>
+    </div>
+    <button class="sheet-btn mark" id="sh-btn" onclick="toggleFromSheet()"></button>
+  </div>
+</div>
+
+<script>
+const PLAN={"version":"1.0","meta":{"athlete":"Harith Alnabhani","races":[{"name":"Olympic Triathlon","date":"2026-11-08","distances":{"swim":1500,"bike":40,"run":10}},{"name":"Ironman 70.3","date":"2027-02-14","distances":{"swim":1900,"bike":90,"run":21.1}}],"planStartDate":"2026-06-01","planEndDate":"2027-02-14","totalWeeks":37,"generatedBy":"Claude Coach"},"preferences":{"swim":"meters","bike":"kilometers","run":"kilometers","firstDayOfWeek":"sunday"},"whoopProfile":{"avgHRV":109,"avgRHR":48,"avgRecovery":64,"estimatedMaxHR":183,"estimatedLTHR_run":165,"estimatedLTHR_bike":163,"sleepDebt":82,"avgSleepHrs":6.1,"coachNote":"Sleep is Harith's #1 performance lever. 82min daily debt. Targeting 7.5hrs race weeks."},"swimmerProfile":{"currentMax":"50m before stopping","background":"Some adult lessons, beginner","poolAccess":"4-7 days/week","targetRace1":"1500m open water (Olympic)","targetRace2":"1900m open water (70.3)","coachNote":"Swimming is THE limiting factor. Phase 1 (5 weeks) is dedicated almost entirely to swim survival skills and building continuous distance. Pool access 4-7x/week is a huge asset \u2014 we use it."},"zones":{"run":{"lthr":165,"z1":{"name":"Recovery","hrLow":0,"hrHigh":134},"z2":{"name":"Aerobic","hrLow":134,"hrHigh":147},"z3":{"name":"Tempo","hrLow":147,"hrHigh":154},"z4":{"name":"Threshold","hrLow":154,"hrHigh":165},"z5":{"name":"VO2max","hrLow":165,"hrHigh":183}},"bike":{"lthr":163,"z1":{"name":"Recovery","hrLow":0,"hrHigh":132},"z2":{"name":"Aerobic","hrLow":132,"hrHigh":145},"z3":{"name":"Tempo","hrLow":145,"hrHigh":155},"z4":{"name":"Threshold","hrLow":155,"hrHigh":165}},"swim":{"cssEstimate":"To be measured Week 6 after swim base is established","z1":"Very easy \u2014 could swim all day","z2":"Comfortable \u2014 could hold 30+ min","z3":"Moderate \u2014 sustainable for 5-10 min sets","z4":"Hard \u2014 CSS pace, 1-3 min sets"}},"phases":[{"id":1,"name":"Swim Foundation","weeks":"1-5","dates":"Jun 1 \u2013 Jul 5","emoji":"\ud83c\udfca","focus":"Build continuous swim from 50m to 400m. Technique is everything. Bike and run maintenance only.","weeklyHours":{"swim":"5-6x/week 20-40min","bike":"1 ride/week","run":"2 runs/week"},"keyMilestone":"Swim 400m continuously by end of Week 5"},{"id":2,"name":"Base Build","weeks":"6-12","dates":"Jul 6 \u2013 Aug 23","emoji":"\ud83c\udfd7\ufe0f","focus":"All 3 sports at Zone 2. Build swim to 1000m continuous. Introduce bricks. CSS test Week 6.","weeklyHours":{"total":"7-9 hrs","swim":"3x/week","bike":"2x/week","run":"2-3x/week"},"keyMilestone":"Swim 1000m continuous, first brick workout"},{"id":3,"name":"Olympic Build","weeks":"13-17","dates":"Aug 24 \u2013 Sep 27","emoji":"\u26a1","focus":"Threshold and race-pace work. Swim to 1500m. Brick sessions at race effort.","weeklyHours":{"total":"9-10 hrs"},"keyMilestone":"Complete full Olympic distance simulation"},{"id":4,"name":"Olympic Peak & Taper","weeks":"18-22","dates":"Sep 28 \u2013 Nov 8","emoji":"\ud83c\udfaf","focus":"Race-specific sharpening. 2-week taper. Race Day Nov 8.","weeklyHours":{"total":"5-8 hrs reducing"},"keyMilestone":"\ud83c\udfc1 RACE DAY \u2014 Olympic Triathlon Nov 8"},{"id":5,"name":"70.3 Base Rebuild","weeks":"23-27","dates":"Nov 9 \u2013 Dec 13","emoji":"\ud83d\udd04","focus":"Active recovery + rebuild. Extend swim to 1900m. Add run volume for half marathon.","weeklyHours":{"total":"6-8 hrs"},"keyMilestone":"Swim 1900m, long run 16km"},{"id":6,"name":"70.3 Build","weeks":"28-32","dates":"Dec 14 \u2013 Jan 17","emoji":"\ud83d\udcc8","focus":"70.3-specific load. Long rides 80-100km. Long run 18-20km. Nutrition practice.","weeklyHours":{"total":"9-11 hrs"},"keyMilestone":"90km ride, full 70.3 brick simulation"},{"id":7,"name":"70.3 Peak & Taper","weeks":"33-37","dates":"Jan 18 \u2013 Feb 14","emoji":"\ud83c\udfc1","focus":"Sharpen race fitness. 2-week taper. Race Day Feb 14.","weeklyHours":{"total":"5-8 hrs reducing"},"keyMilestone":"\ud83c\udfc1 RACE DAY \u2014 Ironman 70.3 Feb 14"}],"weeks":[{"weekNumber":1,"startDate":"2026-05-31","endDate":"2026-06-06","phase":"Swim Foundation","phaseId":1,"focus":"Learn to relax in the water \u2014 breathe, float, move","targetHours":4.5,"isRecoveryWeek":false,"days":[{"date":"2026-05-31","dayOfWeek":"Sunday","workouts":[{"id":"empty-2026-05-31","sport":"rest","type":"rest","name":"Rest","description":"Rest day.","completed":false}]},{"date":"2026-06-01","dayOfWeek":"Monday","workouts":[{"id":"w1-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest day. Let Week 1 begin fresh.","completed":false}]},{"date":"2026-06-02","dayOfWeek":"Tuesday","workouts":[{"id":"w1-tue-swim","sport":"swim","type":"technique","name":"Swim: Breathe & Float","durationMinutes":25,"description":"The single most important skill: relaxed breathing while moving through water.","humanReadable":"5 min: stand in shallow end, practice exhaling underwater through nose+mouth\n\n4\u00d725m: Walk if needed. Goal is to reach the other end breathing rhythmically \u2014 not racing.\n\nRest 60s between each 25m.\n\n4\u00d725m: Focus only on exhaling fully underwater before turning to breathe.\n\nCool-down: Float on back 2 min.\n\nCoach note: 90% of beginner swimmers hold their breath underwater. This drains energy instantly. Fix this first, everything else follows.","completed":false}]},{"date":"2026-06-03","dayOfWeek":"Wednesday","workouts":[{"id":"w1-wed-swim2","sport":"swim","type":"technique","name":"Swim: Kick & Body Position","durationMinutes":25,"description":"Horizontal body position saves enormous energy. Most beginners swim uphill.","humanReadable":"Drill 1: 4\u00d725m kickboard \u2014 focus on horizontal body, hips at surface\nRest 45s between\n\nDrill 2: 4\u00d725m without kickboard \u2014 try to keep same body position from drill\n\nKey feel: Your hips should be almost at the surface. If your legs are sinking, your head is too high.\n\nFix: Look straight DOWN not forward.","completed":false},{"id":"w1-wed-run","sport":"run","type":"aerobic","name":"Run: Easy 35min","durationMinutes":35,"distanceKm":6,"primaryZone":"Zone 2","humanReadable":"35 min easy evening run\nHR 134-147 bpm \u2014 pure Zone 2\nMuscat June: go after 8pm","completed":false}]},{"date":"2026-06-04","dayOfWeek":"Thursday","workouts":[{"id":"w1-thu-swim3","sport":"swim","type":"technique","name":"Swim: Arm Stroke Basics","durationMinutes":30,"description":"Catch-up drill teaches the most important movement in freestyle: the catch.","humanReadable":"4\u00d725m catch-up drill:\n- Swim with one arm extended forward\n- Don't start the pull until the recovering arm 'catches up' and touches it\n- This slows you down but teaches the full reach\nRest 60s between\n\n4\u00d750m normal swim:\n- Apply the long-reach feeling from the drill\n- Count strokes per length \u2014 aim to reduce by 1-2 vs your normal\n\nRest 60s between 50m repeats.","completed":false}]},{"date":"2026-06-05","dayOfWeek":"Friday","workouts":[{"id":"w1-fri-bike","sport":"bike","type":"aerobic","name":"Ride: Easy 60min","durationMinutes":60,"distanceKm":25,"primaryZone":"Zone 2","humanReadable":"60 min easy evening ride\nHR 132-145 bpm\nFocus: smooth cadence 80-90rpm","completed":false}]},{"date":"2026-06-06","dayOfWeek":"Saturday","workouts":[{"id":"w1-sat-swim4","sport":"swim","type":"technique","name":"Swim: First Continuous Attempt","durationMinutes":30,"description":"Try your first 100m without stopping. Walk if you must, but try.","humanReadable":"Warm-up: 4\u00d725m easy (use drills from this week)\n\nCHALLENGE: Swim 100m without stopping\n- If you stop: rest 20s, continue from where you are\n- Goal: finish 100m even if broken into 2-3 pieces\n- If you make it: rest 2 min and try again\n\nCool-down: 2\u00d725m very easy backstroke\n\nRecord: How many stops did you need? We'll track this each week.","completed":false}]}],"summary":{"totalHours":4.5,"bySport":{"swim":{"sessions":4,"hours":1.8},"bike":{"sessions":1,"hours":1,"km":25},"run":{"sessions":2,"hours":1.4,"km":14}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":2,"startDate":"2026-06-07","endDate":"2026-06-13","phase":"Swim Foundation","phaseId":1,"focus":"Build to 200m continuous \u2014 breathing is your engine","targetHours":5,"isRecoveryWeek":false,"days":[{"date":"2026-06-07","dayOfWeek":"Sunday","workouts":[{"id":"w1-sun-run","sport":"run","type":"long","name":"Long Run: 8km Easy","durationMinutes":50,"distanceKm":8,"primaryZone":"Zone 2","humanReadable":"50 min Zone 2 \u2014 all easy\nStay relaxed, run by feel\nDon't go hard \u2014 swimming sessions are training stress too","completed":false}]},{"date":"2026-06-08","dayOfWeek":"Monday","workouts":[{"id":"w2-mon-swim","sport":"swim","type":"technique","name":"Swim: Breathing Pattern","durationMinutes":30,"description":"Every 3 strokes breathing (bilateral) gives you a balanced stroke and better oxygen.","humanReadable":"4\u00d725m: Breathe every 2 strokes (right side only) \u2014 warm up\n4\u00d725m: Breathe every 3 strokes (alternate sides)\n4\u00d725m: Breathe every 4 strokes (push comfort zone)\n\nRest 45s between each\n\nNote which feels most sustainable \u2014 that's your training breath cycle.","completed":false}]},{"date":"2026-06-09","dayOfWeek":"Tuesday","workouts":[{"id":"w2-tue-swim","sport":"swim","type":"technique","name":"Swim: Pull Mechanics","durationMinutes":30,"description":"Your pull is your engine. Fix the S-curve habit most self-taught swimmers have.","humanReadable":"Drill: 4\u00d725m fist swim (close your hands into fists)\n- Forces you to use your forearm as a paddle, not just your palm\n- Your 'feel for water' will come back when you open your hands\nRest 45s\n\n4\u00d750m normal swim: focus on pulling water straight back, not sweeping\n\nRest 60s between 50s\n\nCount strokes. If fist swim had 20 strokes/length and open has 22+, your pull is leaking power.","completed":false},{"id":"w2-tue-run","sport":"run","type":"aerobic","name":"Run: Easy 40min","durationMinutes":40,"distanceKm":7,"primaryZone":"Zone 2","humanReadable":"40 min Zone 2 easy\nHR 134-147 \u2014 no harder","completed":false}]},{"date":"2026-06-10","dayOfWeek":"Wednesday","workouts":[{"id":"w2-wed-swim","sport":"swim","type":"endurance","name":"Swim: 150m Continuous Target","durationMinutes":35,"description":"Push your continuous distance. Slow is fine. Stopping is the enemy.","humanReadable":"Warm-up: 4\u00d725m with catch-up drill\n\nMAIN SET:\nTarget 1: 150m continuous \u2014 use any pace, just keep moving\n(If you stop: note where, rest 20s, continue)\n\nRest 3 min\n\nTarget 2: 100m continuous \u2014 slightly faster than Target 1\n\nRest 2 min\n\n4\u00d725m easy cool-down","completed":false}]},{"date":"2026-06-11","dayOfWeek":"Thursday","workouts":[{"id":"w2-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 70min Zone 2","durationMinutes":70,"distanceKm":30,"primaryZone":"Zone 2","humanReadable":"70 min Zone 2 ride \u2014 HR 132-145\nPractice eating/drinking on the bike","completed":false}]},{"date":"2026-06-12","dayOfWeek":"Friday","workouts":[{"id":"w2-fri-swim","sport":"swim","type":"technique","name":"Swim: Tumble Turn or Open Turn Practice","durationMinutes":25,"description":"Touch turns for now. Get efficient at the wall.","humanReadable":"4\u00d725m: practice pushing off the wall strongly each time \u2014 glide 2m before stroking\n4\u00d750m: focus on smooth turns, minimal rest at wall\n4\u00d725m easy backstroke cool-down\n\nNote: In open water races there are no walls. But pool training requires them. Do them cleanly.","completed":false}]},{"date":"2026-06-13","dayOfWeek":"Saturday","workouts":[{"id":"w2-sat-swim","sport":"swim","type":"endurance","name":"Swim: 200m Milestone","durationMinutes":35,"description":"Your weekly continuous distance test. Target: 200m without stopping.","humanReadable":"Warm-up: 4\u00d750m easy drills\n\nMILESTONE: Swim 200m continuous \u2014 NO stopping\n- Slow down if you need to\n- Breathe every 3 strokes\n- Count lengths (8 lengths of 25m pool)\n\nIf you make it: rest 3 min, swim another 100m easy\nIf you stop once: still great \u2014 note where and why\n\nCool-down: 100m easy","completed":false}]}],"summary":{"totalHours":5.2,"bySport":{"swim":{"sessions":5,"hours":2.5},"bike":{"sessions":1,"hours":1.2,"km":30},"run":{"sessions":2,"hours":1.6,"km":16}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":3,"startDate":"2026-06-14","endDate":"2026-06-20","phase":"Swim Foundation","phaseId":1,"focus":"Build to 300m continuous \u2014 fix the one thing that's stopping you","targetHours":5.5,"isRecoveryWeek":false,"days":[{"date":"2026-06-14","dayOfWeek":"Sunday","workouts":[{"id":"w2-sun-run","sport":"run","type":"long","name":"Long Run: 9km","durationMinutes":55,"distanceKm":9,"primaryZone":"Zone 2","humanReadable":"55 min Zone 2\n9km \u2014 easy, conversational pace","completed":false}]},{"date":"2026-06-15","dayOfWeek":"Monday","workouts":[{"id":"w3-mon-swim","sport":"swim","type":"technique","name":"Swim: Hip Rotation Drill","durationMinutes":30,"description":"Hip rotation adds power and reduces drag simultaneously.","humanReadable":"Drill: 6\u00d725m side-kick drill\n- Kick on your side (ear in water, bottom arm extended)\n- 6 kicks on one side, rotate to opposite, repeat\n- This builds hip rotation into muscle memory\nRest 30s\n\n4\u00d750m: apply rotation \u2014 feel your hips 'driving' each stroke\nRest 45s","completed":false}]},{"date":"2026-06-16","dayOfWeek":"Tuesday","workouts":[{"id":"w3-tue-swim","sport":"swim","type":"endurance","name":"Swim: Sets Building to 300m","durationMinutes":35,"description":"Build toward 300m via accumulation.","humanReadable":"2\u00d750m easy warm-up\n1\u00d7100m @ easy pace, rest 90s\n1\u00d7100m @ easy pace, rest 90s\n1\u00d7100m @ easy pace \u2014 that's 300m total!\nCool-down: 50m easy\n\nNext step: do those 3\u00d7100m with less rest each week until it becomes continuous.","completed":false},{"id":"w3-tue-run","sport":"run","type":"aerobic","name":"Run: 40min + Strides","durationMinutes":45,"distanceKm":8,"primaryZone":"Zone 2","humanReadable":"40 min Zone 2 + 4\u00d7100m strides at end","completed":false}]},{"date":"2026-06-17","dayOfWeek":"Wednesday","workouts":[{"id":"w3-wed-swim","sport":"swim","type":"technique","name":"Swim: Catch Drill Focus","durationMinutes":30,"description":"Early vertical forearm (EVF) \u2014 the most powerful swim technique change you can make.","humanReadable":"Watch: imagine pressing your elbow down while keeping it HIGH near the surface\n\n6\u00d725m fingertip drag drill:\n- On recovery, drag fingertips along the water surface\n- This forces high elbow on recovery\nRest 30s\n\n4\u00d750m: hold that high-elbow feel during the pull phase\nRest 45s","completed":false}]},{"date":"2026-06-18","dayOfWeek":"Thursday","workouts":[{"id":"w3-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 75min + Effort Blocks","durationMinutes":75,"distanceKm":33,"primaryZone":"Zone 2-3","humanReadable":"20 min Zone 2 warm-up\n3\u00d78 min Zone 3 (HR 145-152), 5 min Zone 2 between\n15 min Zone 2 cool-down","completed":false}]},{"date":"2026-06-19","dayOfWeek":"Friday","workouts":[{"id":"w3-fri-swim","sport":"swim","type":"endurance","name":"Swim: 250m Continuous","durationMinutes":35,"description":"Push continuous distance.","humanReadable":"Warm-up: 100m easy drills\nMAIN: 250m continuous\n- If you stop once: rest 20s, finish the distance\nRest 3 min\n2\u00d7100m easy\nCool-down: 50m backstroke","completed":false}]},{"date":"2026-06-20","dayOfWeek":"Saturday","workouts":[{"id":"w3-sat-swim","sport":"swim","type":"endurance","name":"Swim: 300m Milestone Attempt","durationMinutes":40,"description":"12 lengths. Slow and steady wins.","humanReadable":"Warm-up: 4\u00d750m with drills\n\nMILESTONE: 300m continuous\n- That's 12 lengths of a 25m pool\n- Go slower than you think you need to\n- Breathe every 3 strokes\n- If you stop: note which length, rest 15s, continue\n\nCool-down: 100m easy","completed":false},{"id":"w3-sat-run","sport":"run","type":"aerobic","name":"Run: Easy 30min","durationMinutes":30,"distanceKm":5,"primaryZone":"Zone 1-2","humanReadable":"Easy 30 min shake-out after morning swim","completed":false}]}],"summary":{"totalHours":6,"bySport":{"swim":{"sessions":5,"hours":2.8},"bike":{"sessions":1,"hours":1.3,"km":33},"run":{"sessions":3,"hours":1.8,"km":23}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":4,"startDate":"2026-06-21","endDate":"2026-06-27","phase":"Swim Foundation","phaseId":1,"focus":"Recovery week \u2014 consolidate swim technique","targetHours":4,"isRecoveryWeek":true,"days":[{"date":"2026-06-21","dayOfWeek":"Sunday","workouts":[{"id":"w3-sun-run","sport":"run","type":"long","name":"Long Run: 10km","durationMinutes":60,"distanceKm":10,"primaryZone":"Zone 2","humanReadable":"60 min Zone 2\n10km \u2014 keep it easy, you swam a lot this week","completed":false}]},{"date":"2026-06-22","dayOfWeek":"Monday","workouts":[{"id":"w4-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Full rest.","completed":false}]},{"date":"2026-06-23","dayOfWeek":"Tuesday","workouts":[{"id":"w4-tue-swim","sport":"swim","type":"technique","name":"Swim: Pure Drills","durationMinutes":30,"description":"No pressure \u2014 just technique.","humanReadable":"200m: Mix of all drills learned so far (catch-up, fist, fingertip drag, side-kick)\nNo timing, just feel\n4\u00d750m easy with excellent form\nCool-down: 100m backstroke\n\nAsk yourself: which drill helped you most in weeks 1-3?","completed":false}]},{"date":"2026-06-24","dayOfWeek":"Wednesday","workouts":[{"id":"w4-wed-run","sport":"run","type":"recovery","name":"Run: Easy 30min","durationMinutes":30,"distanceKm":5,"primaryZone":"Zone 1","humanReadable":"Very easy 30 min. Zone 1 only. HR under 134.","completed":false}]},{"date":"2026-06-25","dayOfWeek":"Thursday","workouts":[{"id":"w4-thu-swim","sport":"swim","type":"endurance","name":"Swim: Easy 300m","durationMinutes":30,"description":"Repeat last week's milestone but easier.","humanReadable":"300m continuous at whatever pace feels easy\nNo pressure \u2014 just prove to yourself you can do it relaxed","completed":false}]},{"date":"2026-06-26","dayOfWeek":"Friday","workouts":[{"id":"w4-fri-bike","sport":"bike","type":"aerobic","name":"Ride: Easy 60min","durationMinutes":60,"distanceKm":25,"primaryZone":"Zone 1-2","humanReadable":"Easy spin \u2014 HR under 138. Enjoy it.","completed":false}]},{"date":"2026-06-27","dayOfWeek":"Saturday","workouts":[{"id":"w4-sat-swim","sport":"swim","type":"technique","name":"Swim: Video Yourself","durationMinutes":25,"description":"Ask someone to film you underwater or from the side \u2014 it's the fastest way to identify your biggest flaw.","humanReadable":"Swim 4\u00d750m while someone records\nReview the footage: Are your hips sinking? Is your head too high? Are you crossing your centerline with your arm pull?\n\nThis single session can unlock weeks of improvement.","completed":false}]}],"summary":{"totalHours":3.8,"bySport":{"swim":{"sessions":3,"hours":1.4},"bike":{"sessions":1,"hours":1,"km":25},"run":{"sessions":2,"hours":1.3,"km":13}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":5,"startDate":"2026-06-28","endDate":"2026-07-04","phase":"Swim Foundation","phaseId":1,"focus":"Swim 400m continuous \u2014 Phase 1 graduation milestone","targetHours":5.5,"isRecoveryWeek":false,"days":[{"date":"2026-06-28","dayOfWeek":"Sunday","workouts":[{"id":"w4-sun-run","sport":"run","type":"long","name":"Long Run: 8km Easy","durationMinutes":48,"distanceKm":8,"primaryZone":"Zone 2","humanReadable":"48 min easy Zone 2 \u2014 short recovery week long run","completed":false}]},{"date":"2026-06-29","dayOfWeek":"Monday","workouts":[{"id":"w5-mon-swim","sport":"swim","type":"endurance","name":"Swim: Build Sets","durationMinutes":35,"description":"Ladder sets build confidence step by step.","humanReadable":"100m easy\nRest 90s\n150m easy\nRest 90s\n200m easy\nRest 2 min\n100m cool-down\n\nTotal: 550m \u2014 probably your longest ever swim session.","completed":false}]},{"date":"2026-06-30","dayOfWeek":"Tuesday","workouts":[{"id":"w5-tue-swim","sport":"swim","type":"technique","name":"Swim: Breathing & Pacing","durationMinutes":30,"description":"Race breathing: open water swimmers often breathe every 2 strokes on one side. Practice both.","humanReadable":"4\u00d750m breathing every 2 strokes (right side)\n4\u00d750m breathing every 3 strokes (alternate)\n4\u00d750m breathing every 2 strokes (left side)\n\nRest 45s between each. Find your preferred pattern.","completed":false},{"id":"w5-tue-run","sport":"run","type":"aerobic","name":"Run: 45min + Strides","durationMinutes":50,"distanceKm":9,"primaryZone":"Zone 2","humanReadable":"45 min Zone 2 + 4\u00d7100m strides","completed":false}]},{"date":"2026-07-01","dayOfWeek":"Wednesday","workouts":[{"id":"w5-wed-swim","sport":"swim","type":"endurance","name":"Swim: 350m Continuous","durationMinutes":35,"description":"One step below the milestone.","humanReadable":"Warm-up: 100m drills\n350m continuous \u2014 calm pace\nRest 3 min\n150m easy\nCool-down: 50m easy","completed":false}]},{"date":"2026-07-02","dayOfWeek":"Thursday","workouts":[{"id":"w5-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 80min Aerobic","durationMinutes":80,"distanceKm":36,"primaryZone":"Zone 2","humanReadable":"80 min Zone 2 steady ride","completed":false}]},{"date":"2026-07-03","dayOfWeek":"Friday","workouts":[{"id":"w5-fri-swim","sport":"swim","type":"technique","name":"Swim: Sighting Drill","durationMinutes":30,"description":"Open water race skill: lifting your head to sight buoys without losing momentum.","humanReadable":"6\u00d750m: every 4th stroke, lift head forward (crocodile eyes \u2014 just eyes above water)\nPractice this until it feels smooth \u2014 it will cost you 0.5-1 sec per 25m at first\n4\u00d725m fast with sighting practice","completed":false}]},{"date":"2026-07-04","dayOfWeek":"Saturday","workouts":[{"id":"w5-sat-swim-milestone","sport":"swim","type":"endurance","name":"\ud83c\udfaf SWIM: 400m Milestone \u2014 Phase 1 Graduation","durationMinutes":45,"description":"16 lengths. You have built to this for 5 weeks. You are ready.","humanReadable":"Warm-up: 4\u00d750m easy drills\n\n\ud83c\udfaf 400m CONTINUOUS \u2014 your Phase 1 graduation test\n- Pace: controlled, sustainable \u2014 not fast\n- Breathe every 3 strokes\n- Count lengths (16 in a 25m pool)\n- If you stop: rest 15s, continue \u2014 you WILL finish this\n\nIf completed: rest 3 min, swim 200m easy cool-down\n\nRecord your time. In 5 weeks you went from 50m to 400m. That is enormous.","completed":false}]}],"summary":{"totalHours":5.8,"bySport":{"swim":{"sessions":5,"hours":2.8},"bike":{"sessions":1,"hours":1.3,"km":36},"run":{"sessions":2,"hours":1.9,"km":20}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":6,"startDate":"2026-07-05","endDate":"2026-07-11","phase":"Base Build","phaseId":2,"focus":"CSS test + introduce all 3 sports at volume","targetHours":6.5,"isRecoveryWeek":false,"days":[{"date":"2026-07-05","dayOfWeek":"Sunday","workouts":[{"id":"w5-sun-run","sport":"run","type":"long","name":"Long Run: 11km","durationMinutes":65,"distanceKm":11,"primaryZone":"Zone 2","humanReadable":"65 min Zone 2\n11km easy \u2014 you've earned a good run this week","completed":false}]},{"date":"2026-07-06","dayOfWeek":"Monday","workouts":[{"id":"w6-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-07-07","dayOfWeek":"Tuesday","workouts":[{"id":"w6-tue-swim-css","sport":"swim","type":"test","name":"Swim: CSS Time Trial","durationMinutes":50,"description":"Now that you can swim 400m+, measure your actual speed. This sets ALL your swim zones.","humanReadable":"Warm-up: 400m easy + 4\u00d750m build (each one slightly faster)\nRest 5 min\n400m TIME TRIAL \u2014 all out, record time to the second\nRest 10 min (easy swimming)\n200m TIME TRIAL \u2014 all out, record time\nCool-down: 200m easy\n\nCSS (m/sec) = 200 \u00f7 (400m_seconds - 200m_seconds)\nPace/100m = 100 \u00f7 CSS_m_per_sec\n\nShare your times and I'll calculate exact zones!","completed":false}]},{"date":"2026-07-08","dayOfWeek":"Wednesday","workouts":[{"id":"w6-wed-run","sport":"run","type":"aerobic","name":"Run: Easy 45min","durationMinutes":45,"distanceKm":8,"primaryZone":"Zone 2","humanReadable":"45 min Zone 2 easy \u2014 HR 134-147","completed":false}]},{"date":"2026-07-09","dayOfWeek":"Thursday","workouts":[{"id":"w6-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 80min Zone 2","durationMinutes":80,"distanceKm":35,"primaryZone":"Zone 2","humanReadable":"80 min Zone 2 \u2014 HR 132-145\nCadence focus: 85-90rpm","completed":false}]},{"date":"2026-07-10","dayOfWeek":"Friday","workouts":[{"id":"w6-fri-swim","sport":"swim","type":"aerobic","name":"Swim: 500m Aerobic","durationMinutes":40,"description":"First swim past 400m \u2014 you're officially past your old limit.","humanReadable":"Warm-up: 200m drills\nMain: 500m easy continuous\nCool-down: 100m backstroke","completed":false}]},{"date":"2026-07-11","dayOfWeek":"Saturday","workouts":[{"id":"w6-sat-brick","sport":"bike","type":"brick","name":"First Brick: Ride + Run","durationMinutes":95,"distanceKm":40,"primaryZone":"Zone 2","humanReadable":"Ride: 75 min Zone 2\nT2 transition: rack bike, put on running shoes\nRun: 15 min easy \u2014 legs will feel like concrete. NORMAL.\n\nThis is the most important skill in triathlon: running on pre-fatigued legs.","completed":false}]}],"summary":{"totalHours":6.5,"bySport":{"swim":{"sessions":2,"hours":1.5,"meters":1700},"bike":{"sessions":2,"hours":3,"km":75},"run":{"sessions":2,"hours":2,"km":20}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":7,"startDate":"2026-07-12","endDate":"2026-07-18","phase":"Base Build","phaseId":2,"focus":"Build swim sets, first brick, extend run","targetHours":7,"isRecoveryWeek":false,"days":[{"date":"2026-07-12","dayOfWeek":"Sunday","workouts":[{"id":"w6-sun-run","sport":"run","type":"long","name":"Long Run: 12km","durationMinutes":70,"distanceKm":12,"primaryZone":"Zone 2","humanReadable":"70 min Zone 2 \u2014 12km easy","completed":false}]},{"date":"2026-07-13","dayOfWeek":"Monday","workouts":[{"id":"w7-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-07-14","dayOfWeek":"Tuesday","workouts":[{"id":"w7-tue-swim","sport":"swim","type":"aerobic","name":"Swim: 700m \u2014 Broken Sets","durationMinutes":45,"description":"Build total volume with manageable pieces.","humanReadable":"Warm-up: 200m drills\n3\u00d7200m @ easy pace, 30s rest between\nCool-down: 100m easy\nTotal: 900m","completed":false}]},{"date":"2026-07-15","dayOfWeek":"Wednesday","workouts":[{"id":"w7-wed-run","sport":"run","type":"aerobic","name":"Run: 50min + Strides","durationMinutes":55,"distanceKm":10,"primaryZone":"Zone 2","humanReadable":"50 min Zone 2 + 4\u00d7100m strides","completed":false}]},{"date":"2026-07-16","dayOfWeek":"Thursday","workouts":[{"id":"w7-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 85min + Efforts","durationMinutes":85,"distanceKm":38,"primaryZone":"Zone 2-3","humanReadable":"20 min warm-up\n3\u00d710 min Zone 3 (HR 145-152), 5 min Zone 2 between\n15 min cool-down","completed":false}]},{"date":"2026-07-17","dayOfWeek":"Friday","workouts":[{"id":"w7-fri-swim","sport":"swim","type":"aerobic","name":"Swim: 800m Easy Continuous","durationMinutes":45,"description":"Keep building your continuous distance.","humanReadable":"Warm-up: 200m easy\n800m continuous @ easy pace \u2014 32 lengths\nCool-down: 100m easy\n\nIf 800m feels impossible: 2\u00d7400m with 60s rest is fine too","completed":false}]},{"date":"2026-07-18","dayOfWeek":"Saturday","workouts":[{"id":"w7-sat-brick","sport":"bike","type":"brick","name":"Brick: 90min Ride + 20min Run","durationMinutes":115,"distanceKm":45,"primaryZone":"Zone 2","humanReadable":"Ride: 90 min Zone 2\nT2 transition\nRun: 20 min \u2014 first 5 easy, then Zone 2 effort\n\nNote: How do your legs feel at min 5? This gets better every week.","completed":false}]}],"summary":{"totalHours":7.2,"bySport":{"swim":{"sessions":2,"hours":1.5,"meters":1700},"bike":{"sessions":2,"hours":3.3,"km":83},"run":{"sessions":2,"hours":2.2,"km":23}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":8,"startDate":"2026-07-19","endDate":"2026-07-25","phase":"Base Build","phaseId":2,"focus":"Swim hits 1000m continuous \u2014 major milestone","targetHours":7.5,"isRecoveryWeek":false,"days":[{"date":"2026-07-19","dayOfWeek":"Sunday","workouts":[{"id":"w7-sun-run","sport":"run","type":"long","name":"Long Run: 13km","durationMinutes":78,"distanceKm":13,"primaryZone":"Zone 2","humanReadable":"78 min Zone 2 \u2014 13km easy","completed":false}]},{"date":"2026-07-20","dayOfWeek":"Monday","workouts":[{"id":"w8-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-07-21","dayOfWeek":"Tuesday","workouts":[{"id":"w8-tue-swim","sport":"swim","type":"aerobic","name":"Swim: 1000m Build Sets","durationMinutes":55,"description":"Prep for the 1000m milestone via progressive sets.","humanReadable":"Warm-up: 200m drills\n400m continuous @ easy\nRest 90s\n300m continuous @ easy\nRest 90s\n200m continuous\nCool-down: 100m\nTotal: 1200m \u2014 sets add up to more than you realize","completed":false}]},{"date":"2026-07-22","dayOfWeek":"Wednesday","workouts":[{"id":"w8-wed-run","sport":"run","type":"aerobic","name":"Run: 55min + Strides","durationMinutes":60,"distanceKm":11,"primaryZone":"Zone 2","humanReadable":"55 min Zone 2 + 4\u00d7100m strides","completed":false}]},{"date":"2026-07-23","dayOfWeek":"Thursday","workouts":[{"id":"w8-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 90min Zone 2","durationMinutes":90,"distanceKm":42,"primaryZone":"Zone 2","humanReadable":"90 min steady Zone 2 \u2014 HR 132-145\nNutrition practice: gel or banana at 45 min","completed":false}]},{"date":"2026-07-24","dayOfWeek":"Friday","workouts":[{"id":"w8-fri-swim","sport":"swim","type":"endurance","name":"\ud83c\udfaf SWIM: 1000m Continuous Milestone","durationMinutes":50,"description":"40 lengths. This is 2/3 of your Olympic race distance.","humanReadable":"Warm-up: 4\u00d750m drills\n\n\ud83c\udfaf 1000m CONTINUOUS \u2014 40 lengths\n- Pace: slow enough that you could theoretically keep going\n- Breathe every 3 strokes\n- Think in blocks: 'just 10 more lengths'\n\nRecord your time. When you finish this, you know you can finish the race swim.\n\nCool-down: 100m easy","completed":false}]},{"date":"2026-07-25","dayOfWeek":"Saturday","workouts":[{"id":"w8-sat-brick","sport":"bike","type":"brick","name":"Brick: 100min + 25min Run","durationMinutes":130,"distanceKm":50,"primaryZone":"Zone 2","humanReadable":"Ride: 100 min Zone 2\nT2 transition\nRun: 25 min \u2014 first 5 easy, then Zone 2","completed":false}]}],"summary":{"totalHours":7.8,"bySport":{"swim":{"sessions":2,"hours":1.7,"meters":2200},"bike":{"sessions":2,"hours":3.2,"km":92},"run":{"sessions":2,"hours":2.4,"km":25}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":9,"startDate":"2026-07-26","endDate":"2026-08-01","phase":"Base Build","phaseId":2,"focus":"Recovery week \u2014 absorb 3 weeks of base","targetHours":5,"isRecoveryWeek":true,"days":[{"date":"2026-07-26","dayOfWeek":"Sunday","workouts":[{"id":"w8-sun-run","sport":"run","type":"long","name":"Long Run: 14km","durationMinutes":84,"distanceKm":14,"primaryZone":"Zone 2","humanReadable":"84 min Zone 2 \u2014 14km","completed":false}]},{"date":"2026-07-27","dayOfWeek":"Monday","workouts":[{"id":"w9-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Full rest.","completed":false}]},{"date":"2026-07-28","dayOfWeek":"Tuesday","workouts":[{"id":"w9-tue-swim","sport":"swim","type":"technique","name":"Swim: Easy Drills 800m","durationMinutes":40,"humanReadable":"200m drills\n600m easy continuous\nCool-down: 100m backstroke","completed":false}]},{"date":"2026-07-29","dayOfWeek":"Wednesday","workouts":[{"id":"w9-wed-run","sport":"run","type":"recovery","name":"Run: Easy 35min","durationMinutes":35,"distanceKm":6,"primaryZone":"Zone 1","humanReadable":"35 min Zone 1 only. Very easy.","completed":false}]},{"date":"2026-07-30","dayOfWeek":"Thursday","workouts":[{"id":"w9-thu-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest or yoga/stretching.","completed":false}]},{"date":"2026-07-31","dayOfWeek":"Friday","workouts":[{"id":"w9-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 800m","durationMinutes":35,"humanReadable":"800m easy continuous. No pressure.","completed":false}]},{"date":"2026-08-01","dayOfWeek":"Saturday","workouts":[{"id":"w9-sat-ride","sport":"bike","type":"aerobic","name":"Ride: Easy 60min","durationMinutes":60,"distanceKm":25,"primaryZone":"Zone 1-2","humanReadable":"60 min easy spin \u2014 HR under 140","completed":false}]}],"summary":{"totalHours":4.8,"bySport":{"swim":{"sessions":2,"hours":1.3,"meters":1600},"bike":{"sessions":1,"hours":1,"km":25},"run":{"sessions":2,"hours":1.7,"km":17}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":10,"startDate":"2026-08-02","endDate":"2026-08-08","phase":"Base Build","phaseId":2,"focus":"Swim 1200m + introduce threshold taste on bike & run","targetHours":8,"isRecoveryWeek":false,"days":[{"date":"2026-08-02","dayOfWeek":"Sunday","workouts":[{"id":"w9-sun-run","sport":"run","type":"long","name":"Long Run: 11km Easy","durationMinutes":65,"distanceKm":11,"primaryZone":"Zone 2","humanReadable":"65 min Zone 2 \u2014 short recovery long run","completed":false}]},{"date":"2026-08-03","dayOfWeek":"Monday","workouts":[{"id":"w10-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-08-04","dayOfWeek":"Tuesday","workouts":[{"id":"w10-tue-swim","sport":"swim","type":"aerobic","name":"Swim: 1200m Sets","durationMinutes":55,"humanReadable":"Warm-up: 200m drills\n4\u00d7300m @ easy, 30s rest\nCool-down: 200m easy\nTotal: 1600m","completed":false}]},{"date":"2026-08-05","dayOfWeek":"Wednesday","workouts":[{"id":"w10-wed-run","sport":"run","type":"tempo","name":"Run: Tempo Intro \u2014 3\u00d78min","durationMinutes":55,"distanceKm":11,"primaryZone":"Zone 4","humanReadable":"15 min warm-up\n3\u00d78 min threshold (HR 154-163), 3 min jog between\n10 min cool-down","completed":false}]},{"date":"2026-08-06","dayOfWeek":"Thursday","workouts":[{"id":"w10-thu-bike","sport":"bike","type":"sweet-spot","name":"Ride: Sweet Spot Intro","durationMinutes":85,"distanceKm":38,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n2\u00d720 min sweet spot (HR 148-158), 8 min between\n10 min cool-down","completed":false}]},{"date":"2026-08-07","dayOfWeek":"Friday","workouts":[{"id":"w10-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Sighting + 1000m","durationMinutes":50,"humanReadable":"Warm-up: 200m\n1000m with sighting every 4th stroke\nCool-down: 200m\nFocus: comfortable sighting that barely disrupts your stroke","completed":false}]},{"date":"2026-08-08","dayOfWeek":"Saturday","workouts":[{"id":"w10-sat-brick","sport":"bike","type":"brick","name":"Brick: 110min + 25min","durationMinutes":140,"distanceKm":55,"primaryZone":"Zone 2-3","humanReadable":"Ride: 110 min (80 Zone 2, last 20 Zone 3)\nT2 transition\nRun: 25 min \u2014 first 5 easy then Zone 2","completed":false}]}],"summary":{"totalHours":8.2,"bySport":{"swim":{"sessions":2,"hours":1.7,"meters":2800},"bike":{"sessions":2,"hours":3.2,"km":93},"run":{"sessions":2,"hours":2.4,"km":26}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":11,"startDate":"2026-08-09","endDate":"2026-08-15","phase":"Base Build","phaseId":2,"focus":"Swim 1500m + increase intensity across all sports","targetHours":8.5,"isRecoveryWeek":false,"days":[{"date":"2026-08-09","dayOfWeek":"Sunday","workouts":[{"id":"w10-sun-run","sport":"run","type":"long","name":"Long Run: 15km","durationMinutes":90,"distanceKm":15,"primaryZone":"Zone 2","humanReadable":"90 min Zone 2 \u2014 15km\nAugust heat: after 9pm or treadmill","completed":false}]},{"date":"2026-08-10","dayOfWeek":"Monday","workouts":[{"id":"w11-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-08-11","dayOfWeek":"Tuesday","workouts":[{"id":"w11-tue-swim","sport":"swim","type":"aerobic","name":"Swim: 1500m Continuous","durationMinutes":60,"description":"Your Olympic race distance. You're ready.","humanReadable":"Warm-up: 300m drills\n\ud83c\udfaf 1500m continuous \u2014 60 lengths of 25m pool\nPace: slow, steady, sustainable\nThis is your Olympic race swim distance. When you finish, you know you'll make it on race day.\nCool-down: 200m easy","completed":false}]},{"date":"2026-08-12","dayOfWeek":"Wednesday","workouts":[{"id":"w11-wed-run","sport":"run","type":"tempo","name":"Run: Tempo 4\u00d710min","durationMinutes":60,"distanceKm":12,"primaryZone":"Zone 4","humanReadable":"15 min warm-up\n4\u00d710 min threshold (HR 154-163), 3 min jog between\n10 min cool-down","completed":false}]},{"date":"2026-08-13","dayOfWeek":"Thursday","workouts":[{"id":"w11-thu-bike","sport":"bike","type":"sweet-spot","name":"Ride: Sweet Spot 2\u00d725min","durationMinutes":90,"distanceKm":42,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n2\u00d725 min sweet spot (HR 148-158), 8 min between\n15 min cool-down","completed":false}]},{"date":"2026-08-14","dayOfWeek":"Friday","workouts":[{"id":"w11-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m Drills","durationMinutes":45,"humanReadable":"300m drills\n700m easy continuous\nFocus on technique \u2014 recovery after Tuesday","completed":false}]},{"date":"2026-08-15","dayOfWeek":"Saturday","workouts":[{"id":"w11-sat-brick","sport":"bike","type":"brick","name":"Brick: Olympic Preview","durationMinutes":145,"distanceKm":60,"primaryZone":"Zone 3","humanReadable":"Ride: 40km at Zone 3 effort (HR 145-155) \u2014 Olympic bike distance\nT2\nRun: 10km \u2014 first 2 easy, build to Zone 3 by km 3\n\nTime your splits. This is your race simulation.","completed":false}]}],"summary":{"totalHours":8.8,"bySport":{"swim":{"sessions":2,"hours":1.8,"meters":2700},"bike":{"sessions":2,"hours":3.4,"km":102},"run":{"sessions":2,"hours":2.7,"km":28}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":12,"startDate":"2026-08-16","endDate":"2026-08-22","phase":"Base Build","phaseId":2,"focus":"Recovery week \u2014 ready for Olympic Build phase","targetHours":5.5,"isRecoveryWeek":true,"days":[{"date":"2026-08-16","dayOfWeek":"Sunday","workouts":[{"id":"w11-sun-run","sport":"run","type":"long","name":"Long Run: 16km","durationMinutes":96,"distanceKm":16,"primaryZone":"Zone 2","humanReadable":"96 min Zone 2 \u2014 16km\nLongest run of base phase","completed":false}]},{"date":"2026-08-17","dayOfWeek":"Monday","workouts":[{"id":"w12-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Full rest. Your WHOOP recovery drives this week.","completed":false}]},{"date":"2026-08-18","dayOfWeek":"Tuesday","workouts":[{"id":"w12-tue-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m","durationMinutes":40,"humanReadable":"300m drills + 700m easy","completed":false}]},{"date":"2026-08-19","dayOfWeek":"Wednesday","workouts":[{"id":"w12-wed-run","sport":"run","type":"recovery","name":"Run: Easy 35min","durationMinutes":35,"distanceKm":6,"primaryZone":"Zone 1","humanReadable":"35 min Zone 1 only","completed":false}]},{"date":"2026-08-20","dayOfWeek":"Thursday","workouts":[{"id":"w12-thu-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-08-21","dayOfWeek":"Friday","workouts":[{"id":"w12-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 800m","durationMinutes":35,"humanReadable":"800m easy \u2014 no pressure","completed":false}]},{"date":"2026-08-22","dayOfWeek":"Saturday","workouts":[{"id":"w12-sat-ride","sport":"bike","type":"aerobic","name":"Ride: Easy 70min","durationMinutes":70,"distanceKm":28,"primaryZone":"Zone 1-2","humanReadable":"70 min easy \u2014 HR under 142","completed":false}]}],"summary":{"totalHours":5.3,"bySport":{"swim":{"sessions":2,"hours":1.3,"meters":1800},"bike":{"sessions":1,"hours":1.2,"km":28},"run":{"sessions":2,"hours":1.9,"km":19}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":13,"startDate":"2026-08-23","endDate":"2026-08-29","phase":"Olympic Build","phaseId":3,"focus":"Threshold work in all 3 sports \u2014 get race-fit","targetHours":9,"isRecoveryWeek":false,"days":[{"date":"2026-08-23","dayOfWeek":"Sunday","workouts":[{"id":"w12-sun-run","sport":"run","type":"long","name":"Long Run: 13km Easy","durationMinutes":78,"distanceKm":13,"primaryZone":"Zone 2","humanReadable":"78 min Zone 2 \u2014 gentle recovery long run","completed":false}]},{"date":"2026-08-24","dayOfWeek":"Monday","workouts":[{"id":"w13-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-08-25","dayOfWeek":"Tuesday","workouts":[{"id":"w13-tue-swim","sport":"swim","type":"threshold","name":"Swim: CSS Threshold Sets","durationMinutes":60,"humanReadable":"Warm-up: 400m + 4\u00d750m build\nMain: 10\u00d7100m @ CSS pace, 15s rest\nCool-down: 300m easy\n\nCSS pace = effort you could hold for 30 min. Should feel genuinely hard by rep 7-8.","completed":false}]},{"date":"2026-08-26","dayOfWeek":"Wednesday","workouts":[{"id":"w13-wed-run","sport":"run","type":"tempo","name":"Run: Continuous 25min Tempo","durationMinutes":60,"distanceKm":12,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n25 min continuous tempo (HR 150-160)\n15 min cool-down\n\nContinuous tempo is harder than intervals \u2014 builds true race toughness.","completed":false}]},{"date":"2026-08-27","dayOfWeek":"Thursday","workouts":[{"id":"w13-thu-bike","sport":"bike","type":"threshold","name":"Ride: Threshold Intervals","durationMinutes":85,"distanceKm":40,"primaryZone":"Zone 4","humanReadable":"20 min warm-up\n4\u00d710 min threshold (HR 158-165), 5 min between\n15 min cool-down","completed":false}]},{"date":"2026-08-28","dayOfWeek":"Friday","workouts":[{"id":"w13-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1200m + Sighting","durationMinutes":45,"humanReadable":"300m drills\n900m easy with sighting every 4th stroke","completed":false}]},{"date":"2026-08-29","dayOfWeek":"Saturday","workouts":[{"id":"w13-sat-brick","sport":"bike","type":"brick","name":"Brick: Race-Sim Full","durationMinutes":155,"distanceKm":68,"primaryZone":"Zone 3","humanReadable":"Ride: 40km at race effort (HR 145-155)\nT2 transition\nRun: 10km \u2014 2 easy then race pace (Zone 3)\n\nRecord your times \u2014 this is your Olympic race simulation.","completed":false}]}],"summary":{"totalHours":9.2,"bySport":{"swim":{"sessions":2,"hours":1.8},"bike":{"sessions":2,"hours":3.7,"km":108},"run":{"sessions":2,"hours":2.8,"km":29}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":14,"startDate":"2026-08-30","endDate":"2026-09-05","phase":"Olympic Build","phaseId":3,"focus":"VO2max + swim race pace practice","targetHours":9.5,"isRecoveryWeek":false,"days":[{"date":"2026-08-30","dayOfWeek":"Sunday","workouts":[{"id":"w13-sun-run","sport":"run","type":"long","name":"Long Run: 17km","durationMinutes":100,"distanceKm":17,"primaryZone":"Zone 2","humanReadable":"100 min Zone 2 \u2014 17km","completed":false}]},{"date":"2026-08-31","dayOfWeek":"Monday","workouts":[{"id":"w14-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-09-01","dayOfWeek":"Tuesday","workouts":[{"id":"w14-tue-swim","sport":"swim","type":"race-specific","name":"Swim: Open Water Race Sim","durationMinutes":65,"humanReadable":"Warm-up: 400m\n3\u00d7500m @ race effort (Zone 3), 60s rest\n- No touching walls in main set\n- Bilateral breathing only\n- Sight every 6th stroke\nFinisher: 4\u00d7100m @ CSS\nCool-down: 200m","completed":false}]},{"date":"2026-09-02","dayOfWeek":"Wednesday","workouts":[{"id":"w14-wed-run","sport":"run","type":"vo2max","name":"Run: VO2max Intervals","durationMinutes":58,"distanceKm":11,"primaryZone":"Zone 5","humanReadable":"15 min warm-up + strides\n5\u00d71000m @ interval pace (HR 165-175), 400m jog between\n15 min cool-down","completed":false}]},{"date":"2026-09-03","dayOfWeek":"Thursday","workouts":[{"id":"w14-thu-bike","sport":"bike","type":"sweet-spot","name":"Ride: Sweet Spot + Threshold Mix","durationMinutes":90,"distanceKm":42,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n2\u00d720 min sweet spot, 8 min between\n2\u00d76 min threshold, 5 min between\n10 min cool-down","completed":false}]},{"date":"2026-09-04","dayOfWeek":"Friday","workouts":[{"id":"w14-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m","durationMinutes":40,"humanReadable":"200m drills + 800m easy","completed":false}]},{"date":"2026-09-05","dayOfWeek":"Saturday","workouts":[{"id":"w14-sat-brick","sport":"bike","type":"brick","name":"Brick: Extended Race Effort","durationMinutes":160,"distanceKm":72,"primaryZone":"Zone 3","humanReadable":"Ride: 45km Zone 3 effort\nT2\nRun: 12km \u2014 race pace after 2km warm-up","completed":false}]}],"summary":{"totalHours":9.8,"bySport":{"swim":{"sessions":2,"hours":1.8},"bike":{"sessions":2,"hours":4.2,"km":114},"run":{"sessions":2,"hours":3,"km":29}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":15,"startDate":"2026-09-06","endDate":"2026-09-12","phase":"Olympic Build","phaseId":3,"focus":"Recovery week 3 \u2014 critical rest before peak","targetHours":5.5,"isRecoveryWeek":true,"days":[{"date":"2026-09-06","dayOfWeek":"Sunday","workouts":[{"id":"w14-sun-run","sport":"run","type":"long","name":"Long Run: 18km","durationMinutes":108,"distanceKm":18,"primaryZone":"Zone 2","humanReadable":"108 min Zone 2 \u2014 18km. Peak long run for Olympic build.","completed":false}]},{"date":"2026-09-07","dayOfWeek":"Monday","workouts":[{"id":"w15-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Full rest. Check WHOOP \u2014 if HRV is below 85ms, add another rest day.","completed":false}]},{"date":"2026-09-08","dayOfWeek":"Tuesday","workouts":[{"id":"w15-tue-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m","durationMinutes":40,"humanReadable":"200m drills + 800m easy","completed":false}]},{"date":"2026-09-09","dayOfWeek":"Wednesday","workouts":[{"id":"w15-wed-run","sport":"run","type":"recovery","name":"Run: Easy 35min","durationMinutes":35,"distanceKm":6,"primaryZone":"Zone 1","humanReadable":"Zone 1 only. Very easy.","completed":false}]},{"date":"2026-09-10","dayOfWeek":"Thursday","workouts":[{"id":"w15-thu-bike","sport":"bike","type":"aerobic","name":"Ride: Easy 65min","durationMinutes":65,"distanceKm":27,"primaryZone":"Zone 1-2","humanReadable":"Easy spin, HR under 140","completed":false}]},{"date":"2026-09-11","dayOfWeek":"Friday","workouts":[{"id":"w15-fri-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-09-12","dayOfWeek":"Saturday","workouts":[{"id":"w15-sat-brick","sport":"bike","type":"brick","name":"Brick: Light 30km + Run","durationMinutes":90,"distanceKm":35,"primaryZone":"Zone 2","humanReadable":"Ride: 70 min Zone 2\nT2\nRun: 20 min easy","completed":false}]}],"summary":{"totalHours":5.3,"bySport":{"swim":{"sessions":1,"hours":0.7},"bike":{"sessions":2,"hours":2.3,"km":62},"run":{"sessions":2,"hours":1.9,"km":20}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":16,"startDate":"2026-09-13","endDate":"2026-09-19","phase":"Olympic Build","phaseId":3,"focus":"Peak build \u2014 hardest week of the Olympic block","targetHours":10,"isRecoveryWeek":false,"days":[{"date":"2026-09-13","dayOfWeek":"Sunday","workouts":[{"id":"w15-sun-run","sport":"run","type":"long","name":"Long Run: 14km Easy","durationMinutes":84,"distanceKm":14,"primaryZone":"Zone 2","humanReadable":"84 min Zone 2 \u2014 feel the freshness returning","completed":false}]},{"date":"2026-09-14","dayOfWeek":"Monday","workouts":[{"id":"w16-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-09-15","dayOfWeek":"Tuesday","workouts":[{"id":"w16-tue-swim","sport":"swim","type":"threshold","name":"Swim: 1500m Time Trial","durationMinutes":60,"description":"Measure your race-ready swim fitness.","humanReadable":"Warm-up: 600m easy + 4\u00d750m build\nRest 5 min\n\ud83c\udfaf 1500m TIME TRIAL \u2014 all out\nRecord your time \u2014 this is your predicted race swim split\nCool-down: 300m easy","completed":false}]},{"date":"2026-09-16","dayOfWeek":"Wednesday","workouts":[{"id":"w16-wed-run","sport":"run","type":"race-pace","name":"Run: 10km Race Pace","durationMinutes":65,"distanceKm":13,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n10km at Olympic race pace (HR 150-160, ~5:00-5:20/km)\n10 min cool-down\n\nRecord your 10km split. This is your predicted run time.","completed":false}]},{"date":"2026-09-17","dayOfWeek":"Thursday","workouts":[{"id":"w16-thu-bike","sport":"bike","type":"race-specific","name":"Ride: 40km Race Effort","durationMinutes":90,"distanceKm":43,"primaryZone":"Zone 3","humanReadable":"10 min warm-up\n40km at race effort (HR 145-155)\n10 min cool-down\n\nTime your 40km. This is your predicted bike split.","completed":false}]},{"date":"2026-09-18","dayOfWeek":"Friday","workouts":[{"id":"w16-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m Recovery","durationMinutes":40,"humanReadable":"1000m easy \u2014 recovery from TT","completed":false}]},{"date":"2026-09-19","dayOfWeek":"Saturday","workouts":[{"id":"w16-sat-brick","sport":"bike","type":"brick","name":"Brick: Full Race Simulation","durationMinutes":160,"distanceKm":72,"primaryZone":"Zone 3","humanReadable":"Swim (if open water available): 1500m\nOR go straight to:\nRide: 40km race effort\nT2 transition\nRun: 10km race pace\n\nThis IS your Olympic triathlon rehearsal. Run through your nutrition plan too.","completed":false}]}],"summary":{"totalHours":9.8,"bySport":{"swim":{"sessions":2,"hours":1.7},"bike":{"sessions":2,"hours":4,"km":115},"run":{"sessions":2,"hours":2.9,"km":29}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":17,"startDate":"2026-09-20","endDate":"2026-09-26","phase":"Olympic Build","phaseId":3,"focus":"Final build week \u2014 taper begins next week","targetHours":8,"isRecoveryWeek":false,"days":[{"date":"2026-09-20","dayOfWeek":"Sunday","workouts":[{"id":"w16-sun-run","sport":"run","type":"long","name":"Long Run: 16km Easy","durationMinutes":96,"distanceKm":16,"primaryZone":"Zone 2","humanReadable":"96 min Zone 2 \u2014 tired legs. Good.","completed":false}]},{"date":"2026-09-21","dayOfWeek":"Monday","workouts":[{"id":"w17-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-09-22","dayOfWeek":"Tuesday","workouts":[{"id":"w17-tue-swim","sport":"swim","type":"threshold","name":"Swim: CSS Sets 2500m","durationMinutes":60,"humanReadable":"Warm-up: 400m\n5\u00d7300m @ CSS pace, 30s rest\nCool-down: 300m\nTotal: 2500m","completed":false}]},{"date":"2026-09-23","dayOfWeek":"Wednesday","workouts":[{"id":"w17-wed-run","sport":"run","type":"tempo","name":"Run: Tempo 20min","durationMinutes":55,"distanceKm":11,"primaryZone":"Zone 3-4","humanReadable":"15 min warm-up\n20 min tempo (HR 150-160)\n15 min cool-down","completed":false}]},{"date":"2026-09-24","dayOfWeek":"Thursday","workouts":[{"id":"w17-thu-bike","sport":"bike","type":"sweet-spot","name":"Ride: Sweet Spot Short","durationMinutes":80,"distanceKm":36,"primaryZone":"Zone 3","humanReadable":"15 min warm-up\n2\u00d718 min sweet spot, 8 min between\n15 min cool-down","completed":false}]},{"date":"2026-09-25","dayOfWeek":"Friday","workouts":[{"id":"w17-fri-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1200m","durationMinutes":45,"humanReadable":"300m drills + 900m easy","completed":false}]},{"date":"2026-09-26","dayOfWeek":"Saturday","workouts":[{"id":"w17-sat-brick","sport":"bike","type":"brick","name":"Brick: 35km + 8km Run","durationMinutes":125,"distanceKm":45,"primaryZone":"Zone 3","humanReadable":"Ride: 35km race effort\nT2\nRun: 8km \u2014 last 5 at race pace\n\nLast hard brick before taper. Finish strong.","completed":false}]}],"summary":{"totalHours":8.2,"bySport":{"swim":{"sessions":2,"hours":1.8},"bike":{"sessions":2,"hours":3.3,"km":81},"run":{"sessions":2,"hours":2.3,"km":25}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":18,"startDate":"2026-09-27","endDate":"2026-10-03","phase":"Olympic Peak & Taper","phaseId":4,"focus":"Taper begins \u2014 volume down 40%, intensity maintained","targetHours":6.5,"isRecoveryWeek":true,"days":[{"date":"2026-09-27","dayOfWeek":"Sunday","workouts":[{"id":"w17-sun-run","sport":"run","type":"long","name":"Long Run: 14km","durationMinutes":84,"distanceKm":14,"primaryZone":"Zone 2","humanReadable":"84 min Zone 2 \u2014 final long run before Olympic taper","completed":false}]},{"date":"2026-09-28","dayOfWeek":"Monday","workouts":[{"id":"w18-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Taper starts. The hay is in the barn.","completed":false}]},{"date":"2026-09-29","dayOfWeek":"Tuesday","workouts":[{"id":"w18-tue-swim","sport":"swim","type":"race-specific","name":"Swim: Snappy 1500m","durationMinutes":50,"humanReadable":"Warm-up: 300m\n4\u00d7300m @ race effort, 40s rest\nFinisher: 4\u00d750m fast\nCool-down: 200m\n\nYou should feel FAST. That's the taper.","completed":false}]},{"date":"2026-09-30","dayOfWeek":"Wednesday","workouts":[{"id":"w18-wed-run","sport":"run","type":"race-pace","name":"Run: Short Race-Pace","durationMinutes":45,"distanceKm":9,"primaryZone":"Zone 3","humanReadable":"15 min easy\n4\u00d75 min race pace, 2 min jog between\n10 min easy","completed":false}]},{"date":"2026-10-01","dayOfWeek":"Thursday","workouts":[{"id":"w18-thu-bike","sport":"bike","type":"aerobic","name":"Ride: 60min + Bursts","durationMinutes":60,"distanceKm":26,"primaryZone":"Zone 2","humanReadable":"50 min easy\n5\u00d730s at race effort, 2 min easy between","completed":false}]},{"date":"2026-10-02","dayOfWeek":"Friday","workouts":[{"id":"w18-fri-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest.","completed":false}]},{"date":"2026-10-03","dayOfWeek":"Saturday","workouts":[{"id":"w18-sat-swim","sport":"swim","type":"aerobic","name":"Swim: Easy 1000m","durationMinutes":35,"humanReadable":"1000m easy \u2014 stay loose","completed":false}]}],"summary":{"totalHours":6,"bySport":{"swim":{"sessions":2,"hours":1.4},"bike":{"sessions":1,"hours":1,"km":26},"run":{"sessions":2,"hours":1.9,"km":21}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":19,"startDate":"2026-10-04","endDate":"2026-10-10","phase":"Olympic Peak & Taper","phaseId":4,"focus":"Deep taper \u2014 fresh legs loading","targetHours":4,"isRecoveryWeek":true,"days":[{"date":"2026-10-04","dayOfWeek":"Sunday","workouts":[{"id":"w18-sun-run","sport":"run","type":"long","name":"Long Run: 12km Easy","durationMinutes":72,"distanceKm":12,"primaryZone":"Zone 2","humanReadable":"Easy 72 min. Legs should feel springy.","completed":false}]},{"date":"2026-10-05","dayOfWeek":"Monday","workouts":[{"id":"w19-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest. Sleep. Target 7.5hrs.","completed":false}]},{"date":"2026-10-06","dayOfWeek":"Tuesday","workouts":[{"id":"w19-tue-swim","sport":"swim","type":"race-specific","name":"Swim: Sharp 800m","durationMinutes":30,"humanReadable":"200m easy\n4\u00d7100m @ race effort, 30s rest\n4\u00d750m fast, 30s rest\n200m easy","completed":false}]},{"date":"2026-10-07","dayOfWeek":"Wednesday","workouts":[{"id":"w19-wed-run","sport":"run","type":"race-pace","name":"Run: 25min with Race Efforts","durationMinutes":30,"distanceKm":5,"primaryZone":"Zone 2-3","humanReadable":"15 min easy\n3\u00d72 min race pace, 2 min jog\n5 min easy","completed":false}]},{"date":"2026-10-08","dayOfWeek":"Thursday","workouts":[{"id":"w19-thu-bike","sport":"bike","type":"aerobic","name":"Ride: Easy 40min","durationMinutes":40,"distanceKm":17,"primaryZone":"Zone 1-2","humanReadable":"Easy spin \u2014 just keep legs moving","completed":false}]},{"date":"2026-10-09","dayOfWeek":"Friday","workouts":[{"id":"w19-fri-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest. Prepare gear. Check transitions.","completed":false}]},{"date":"2026-10-10","dayOfWeek":"Saturday","workouts":[{"id":"w19-sat-swim","sport":"swim","type":"aerobic","name":"Swim: Open Water Preview","durationMinutes":20,"humanReadable":"600m easy in open water if possible\nPractice sighting\nDo NOT push hard","completed":false}]}],"summary":{"totalHours":3.5,"bySport":{"swim":{"sessions":2,"hours":0.8},"bike":{"sessions":1,"hours":0.7,"km":17},"run":{"sessions":1,"hours":0.5,"km":5}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":20,"startDate":"2026-10-11","endDate":"2026-10-17","phase":"Olympic Peak & Taper","phaseId":4,"focus":"Race Week \u2014 arrive fresh, confident, ready","targetHours":1.5,"isRecoveryWeek":true,"days":[{"date":"2026-10-11","dayOfWeek":"Sunday","workouts":[{"id":"w19-sun-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest. Hydrate. Visualize your race. Sleep by 9:30pm.","completed":false}]},{"date":"2026-10-12","dayOfWeek":"Monday","workouts":[{"id":"w20-mon-rest","sport":"rest","type":"rest","name":"Rest","description":"Sleep 7.5hrs. Hydrate. Eat normally.","completed":false}]},{"date":"2026-10-13","dayOfWeek":"Tuesday","workouts":[{"id":"w20-tue-swim","sport":"swim","type":"aerobic","name":"Swim: 20min Easy","durationMinutes":20,"humanReadable":"600m easy + 4\u00d750m at race effort feel\nDone. You're ready.","completed":false}]},{"date":"2026-10-14","dayOfWeek":"Wednesday","workouts":[{"id":"w20-wed-run","sport":"run","type":"recovery","name":"Run: 20min Shakeout","durationMinutes":20,"distanceKm":3,"primaryZone":"Zone 1","humanReadable":"20 min easy + 2\u00d730s at race pace to stay sharp","completed":false}]},{"date":"2026-10-15","dayOfWeek":"Thursday","workouts":[{"id":"w20-thu-rest","sport":"rest","type":"rest","name":"Rest","description":"Rest. Pack transition bags. Eat well.","completed":false}]},{"date":"2026-10-16","dayOfWeek":"Friday","workouts":[{"id":"w20-fri-rest","sport":"rest","type":"rest","name":"Rest","description":"Transition check-in. Rack bike. Sleep by 9pm.","completed":false}]},{"date":"2026-10-17","dayOfWeek":"Saturday","workouts":[{"id":"w20-sat-race","sport":"race","type":"race","name":"\ud83c\udfc1 RACE DAY \u2014 Olympic Triathlon","durationMinutes":150,"humanReadable":"SWIM 1500m: Start conservatively. Find rhythm by 300m. Breathe every 3. Minimal kick.\n\nT1: Calm. Take 10 extra seconds if needed.\n\nBIKE 40km: First 10 min Zone 2. Then Zone 3 (HR 145-155). Drink every 10 min.\n\nT2: Rack, helmet off, run shoes on.\n\nRUN 10km: First 2km will feel terrible \u2014 NORMAL. Build by km 3. Push final 2km.\n\nYOU WENT FROM 50m SWIMMER TO OLYMPIC TRIATHLETE IN 22 WEEKS. GO.","completed":false}]}],"summary":{"totalHours":1.2,"bySport":{"swim":{"sessions":1,"hours":0.3},"bike":{"sessions":0,"hours":0},"run":{"sessions":1,"hours":0.3,"km":3}}},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":21,"startDate":"2026-10-18","endDate":"2026-10-24","phase":"70.3 Base Rebuild","phaseId":5,"focus":"Post-race active recovery \u2014 celebrate, then regroup","targetHours":5,"isRecoveryWeek":true,"coachNotes":"Swim: Easy 1000m 2x\nBike: Easy 60min\nRun: Easy 30min x2\n\nYour body needs 7-10 days true recovery after an Olympic tri.","days":[{"date":"2026-10-18","dayOfWeek":"Sunday","workouts":[{"id":"w20-sun-celebrate","sport":"rest","type":"rest","name":"\ud83c\udf89 REST & CELEBRATE","description":"You finished an Olympic Triathlon. Eat whatever you want. Now we prepare for 70.3.","completed":false}]},{"date":"2026-10-19","dayOfWeek":"Monday","workouts":[{"id":"w21-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-10-20","dayOfWeek":"Tuesday","workouts":[{"id":"w21-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-21","dayOfWeek":"Wednesday","workouts":[{"id":"w21-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-22","dayOfWeek":"Thursday","workouts":[{"id":"w21-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-23","dayOfWeek":"Friday","workouts":[{"id":"w21-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-24","dayOfWeek":"Saturday","workouts":[{"id":"w21-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":22,"startDate":"2026-10-25","endDate":"2026-10-31","phase":"70.3 Base Rebuild","phaseId":5,"focus":"Rebuild base \u2014 introduce 70.3 distances","targetHours":6.5,"isRecoveryWeek":false,"coachNotes":"Swim: 3x/week, build to 1900m target. Bike: 90min Zone 2. Run: 14km long run, 70.3 requires 21km \u2014 we start building now.","days":[{"date":"2026-10-25","dayOfWeek":"Sunday","workouts":[{"id":"w21-sun","sport":"training","type":"training","name":"Training Day 7","description":"Swim: Easy 1000m 2x\nBike: Easy 60min\nRun: Easy 30min x2\n\nYour body needs 7-10 days true recovery after an Olympic tri.","completed":false}]},{"date":"2026-10-26","dayOfWeek":"Monday","workouts":[{"id":"w22-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-10-27","dayOfWeek":"Tuesday","workouts":[{"id":"w22-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-28","dayOfWeek":"Wednesday","workouts":[{"id":"w22-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-29","dayOfWeek":"Thursday","workouts":[{"id":"w22-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-30","dayOfWeek":"Friday","workouts":[{"id":"w22-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-10-31","dayOfWeek":"Saturday","workouts":[{"id":"w22-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":6.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":23,"startDate":"2026-11-01","endDate":"2026-11-07","phase":"70.3 Base Rebuild","phaseId":5,"focus":"Swim 1900m + extend bike and run","targetHours":7,"isRecoveryWeek":false,"coachNotes":"Swim 1900m continuous (race distance). Bike: 100km/week. Run: 15km long run.","days":[{"date":"2026-11-01","dayOfWeek":"Sunday","workouts":[{"id":"w22-sun","sport":"training","type":"training","name":"Training Day 7","description":"Swim: 3x/week, build to 1900m target. Bike: 90min Zone 2. Run: 14km long run, 70.3 requires 21km \u2014 we start building now.","completed":false}]},{"date":"2026-11-02","dayOfWeek":"Monday","workouts":[{"id":"w23-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-11-03","dayOfWeek":"Tuesday","workouts":[{"id":"w23-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-04","dayOfWeek":"Wednesday","workouts":[{"id":"w23-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-05","dayOfWeek":"Thursday","workouts":[{"id":"w23-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-06","dayOfWeek":"Friday","workouts":[{"id":"w23-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-07","dayOfWeek":"Saturday","workouts":[{"id":"w23-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":7,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":24,"startDate":"2026-11-08","endDate":"2026-11-14","phase":"70.3 Base Rebuild","phaseId":5,"focus":"Base extension \u2014 introduce longer rides","targetHours":7.5,"isRecoveryWeek":false,"coachNotes":"Bike: first 80km ride. Run: 16km long. Swim: aerobic maintenance 1900m+.","days":[{"date":"2026-11-08","dayOfWeek":"Sunday","workouts":[{"id":"w23-sun","sport":"training","type":"training","name":"Training Day 7","description":"Swim 1900m continuous (race distance). Bike: 100km/week. Run: 15km long run.","completed":false}]},{"date":"2026-11-09","dayOfWeek":"Monday","workouts":[{"id":"w24-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-11-10","dayOfWeek":"Tuesday","workouts":[{"id":"w24-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-11","dayOfWeek":"Wednesday","workouts":[{"id":"w24-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-12","dayOfWeek":"Thursday","workouts":[{"id":"w24-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-13","dayOfWeek":"Friday","workouts":[{"id":"w24-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-14","dayOfWeek":"Saturday","workouts":[{"id":"w24-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":7.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":25,"startDate":"2026-11-15","endDate":"2026-11-21","phase":"70.3 Base Rebuild","phaseId":5,"focus":"Recovery week","targetHours":5,"isRecoveryWeek":true,"coachNotes":"Reduced volume. Swim: easy 1200m x2. Bike: 65min easy. Run: 12km easy.","days":[{"date":"2026-11-15","dayOfWeek":"Sunday","workouts":[{"id":"w24-sun","sport":"training","type":"training","name":"Training Day 7","description":"Bike: first 80km ride. Run: 16km long. Swim: aerobic maintenance 1900m+.","completed":false}]},{"date":"2026-11-16","dayOfWeek":"Monday","workouts":[{"id":"w25-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-11-17","dayOfWeek":"Tuesday","workouts":[{"id":"w25-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-18","dayOfWeek":"Wednesday","workouts":[{"id":"w25-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-19","dayOfWeek":"Thursday","workouts":[{"id":"w25-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-20","dayOfWeek":"Friday","workouts":[{"id":"w25-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-21","dayOfWeek":"Saturday","workouts":[{"id":"w25-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":26,"startDate":"2026-11-22","endDate":"2026-11-28","phase":"70.3 Build","phaseId":6,"focus":"70.3 Build begins \u2014 longer everything","targetHours":8,"isRecoveryWeek":false,"coachNotes":"Swim: 2200m sets with CSS work. Bike: 90km long ride + sweet spot. Run: 17km long.","days":[{"date":"2026-11-22","dayOfWeek":"Sunday","workouts":[{"id":"w25-sun","sport":"training","type":"training","name":"Training Day 7","description":"Reduced volume. Swim: easy 1200m x2. Bike: 65min easy. Run: 12km easy.","completed":false}]},{"date":"2026-11-23","dayOfWeek":"Monday","workouts":[{"id":"w26-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-11-24","dayOfWeek":"Tuesday","workouts":[{"id":"w26-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-25","dayOfWeek":"Wednesday","workouts":[{"id":"w26-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-26","dayOfWeek":"Thursday","workouts":[{"id":"w26-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-27","dayOfWeek":"Friday","workouts":[{"id":"w26-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-11-28","dayOfWeek":"Saturday","workouts":[{"id":"w26-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":8,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":27,"startDate":"2026-11-29","endDate":"2026-12-05","phase":"70.3 Build","phaseId":6,"focus":"Half marathon long run + race bricks","targetHours":9,"isRecoveryWeek":false,"coachNotes":"Run: 18km long run (approaching half marathon). Bike: first 90km ride! Brick: 80km + 10km run.","days":[{"date":"2026-11-29","dayOfWeek":"Sunday","workouts":[{"id":"w26-sun","sport":"training","type":"training","name":"Training Day 7","description":"Swim: 2200m sets with CSS work. Bike: 90km long ride + sweet spot. Run: 17km long.","completed":false}]},{"date":"2026-11-30","dayOfWeek":"Monday","workouts":[{"id":"w27-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-12-01","dayOfWeek":"Tuesday","workouts":[{"id":"w27-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-02","dayOfWeek":"Wednesday","workouts":[{"id":"w27-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-03","dayOfWeek":"Thursday","workouts":[{"id":"w27-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-04","dayOfWeek":"Friday","workouts":[{"id":"w27-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-05","dayOfWeek":"Saturday","workouts":[{"id":"w27-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":9,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":28,"startDate":"2026-12-06","endDate":"2026-12-12","phase":"70.3 Build","phaseId":6,"focus":"Build peak \u2014 90km ride + 20km run","targetHours":9.5,"isRecoveryWeek":false,"coachNotes":"Bike: 90km long ride at Zone 2-3. Run: 20km long run. Swim: 2500m threshold sets.","days":[{"date":"2026-12-06","dayOfWeek":"Sunday","workouts":[{"id":"w27-sun","sport":"training","type":"training","name":"Training Day 7","description":"Run: 18km long run (approaching half marathon). Bike: first 90km ride! Brick: 80km + 10km run.","completed":false}]},{"date":"2026-12-07","dayOfWeek":"Monday","workouts":[{"id":"w28-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-12-08","dayOfWeek":"Tuesday","workouts":[{"id":"w28-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-09","dayOfWeek":"Wednesday","workouts":[{"id":"w28-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-10","dayOfWeek":"Thursday","workouts":[{"id":"w28-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-11","dayOfWeek":"Friday","workouts":[{"id":"w28-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-12","dayOfWeek":"Saturday","workouts":[{"id":"w28-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":9.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":29,"startDate":"2026-12-13","endDate":"2026-12-19","phase":"70.3 Build","phaseId":6,"focus":"Recovery week","targetHours":5.5,"isRecoveryWeek":true,"coachNotes":"Absorb the huge training load. Sleep priority. WHOOP green days target.","days":[{"date":"2026-12-13","dayOfWeek":"Sunday","workouts":[{"id":"w28-sun","sport":"training","type":"training","name":"Training Day 7","description":"Bike: 90km long ride at Zone 2-3. Run: 20km long run. Swim: 2500m threshold sets.","completed":false}]},{"date":"2026-12-14","dayOfWeek":"Monday","workouts":[{"id":"w29-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-12-15","dayOfWeek":"Tuesday","workouts":[{"id":"w29-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-16","dayOfWeek":"Wednesday","workouts":[{"id":"w29-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-17","dayOfWeek":"Thursday","workouts":[{"id":"w29-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-18","dayOfWeek":"Friday","workouts":[{"id":"w29-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-19","dayOfWeek":"Saturday","workouts":[{"id":"w29-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":5.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":30,"startDate":"2026-12-20","endDate":"2026-12-26","phase":"70.3 Build","phaseId":6,"focus":"Peak 70.3 training week","targetHours":10,"isRecoveryWeek":false,"coachNotes":"Swim: 2800m race sets. Bike: 100km ride + threshold intervals. Run: 21km long (half marathon distance!). Full 70.3 brick simulation.","days":[{"date":"2026-12-20","dayOfWeek":"Sunday","workouts":[{"id":"w29-sun","sport":"training","type":"training","name":"Training Day 7","description":"Absorb the huge training load. Sleep priority. WHOOP green days target.","completed":false}]},{"date":"2026-12-21","dayOfWeek":"Monday","workouts":[{"id":"w30-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-12-22","dayOfWeek":"Tuesday","workouts":[{"id":"w30-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-23","dayOfWeek":"Wednesday","workouts":[{"id":"w30-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-24","dayOfWeek":"Thursday","workouts":[{"id":"w30-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-25","dayOfWeek":"Friday","workouts":[{"id":"w30-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-26","dayOfWeek":"Saturday","workouts":[{"id":"w30-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":10,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":31,"startDate":"2026-12-27","endDate":"2027-01-02","phase":"70.3 Build","phaseId":6,"focus":"Second peak week \u2014 consolidate","targetHours":10,"isRecoveryWeek":false,"coachNotes":"Repeat peak load structure. Swim: 2500m CSS. Bike: 95km. Run: 21km. Brick: 80km + 15km.","days":[{"date":"2026-12-27","dayOfWeek":"Sunday","workouts":[{"id":"w30-sun","sport":"training","type":"training","name":"Training Day 7","description":"Swim: 2800m race sets. Bike: 100km ride + threshold intervals. Run: 21km long (half marathon distance!). Full 70.3 brick simulation.","completed":false}]},{"date":"2026-12-28","dayOfWeek":"Monday","workouts":[{"id":"w31-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2026-12-29","dayOfWeek":"Tuesday","workouts":[{"id":"w31-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-30","dayOfWeek":"Wednesday","workouts":[{"id":"w31-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2026-12-31","dayOfWeek":"Thursday","workouts":[{"id":"w31-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-01","dayOfWeek":"Friday","workouts":[{"id":"w31-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-02","dayOfWeek":"Saturday","workouts":[{"id":"w31-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":10,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":32,"startDate":"2027-01-03","endDate":"2027-01-09","phase":"70.3 Build","phaseId":6,"focus":"Pre-taper recovery","targetHours":6,"isRecoveryWeek":true,"coachNotes":"Last recovery before 70.3 taper. Body absorbing peak fitness.","days":[{"date":"2027-01-03","dayOfWeek":"Sunday","workouts":[{"id":"w31-sun","sport":"training","type":"training","name":"Training Day 7","description":"Repeat peak load structure. Swim: 2500m CSS. Bike: 95km. Run: 21km. Brick: 80km + 15km.","completed":false}]},{"date":"2027-01-04","dayOfWeek":"Monday","workouts":[{"id":"w32-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-01-05","dayOfWeek":"Tuesday","workouts":[{"id":"w32-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-06","dayOfWeek":"Wednesday","workouts":[{"id":"w32-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-07","dayOfWeek":"Thursday","workouts":[{"id":"w32-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-08","dayOfWeek":"Friday","workouts":[{"id":"w32-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-09","dayOfWeek":"Saturday","workouts":[{"id":"w32-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":6,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":33,"startDate":"2027-01-10","endDate":"2027-01-16","phase":"70.3 Peak & Taper","phaseId":7,"focus":"70.3 Taper begins \u2014 volume -40%, intensity held","targetHours":7.5,"isRecoveryWeek":true,"coachNotes":"Maintain intensity, reduce volume. Swim: 1800m race sets. Bike: 70km. Run: 15km.","days":[{"date":"2027-01-10","dayOfWeek":"Sunday","workouts":[{"id":"w32-sun","sport":"training","type":"training","name":"Training Day 7","description":"Last recovery before 70.3 taper. Body absorbing peak fitness.","completed":false}]},{"date":"2027-01-11","dayOfWeek":"Monday","workouts":[{"id":"w33-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-01-12","dayOfWeek":"Tuesday","workouts":[{"id":"w33-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-13","dayOfWeek":"Wednesday","workouts":[{"id":"w33-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-14","dayOfWeek":"Thursday","workouts":[{"id":"w33-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-15","dayOfWeek":"Friday","workouts":[{"id":"w33-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-16","dayOfWeek":"Saturday","workouts":[{"id":"w33-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":7.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":34,"startDate":"2027-01-17","endDate":"2027-01-23","phase":"70.3 Peak & Taper","phaseId":7,"focus":"Deep taper \u2014 feel the freshness","targetHours":5.5,"isRecoveryWeek":true,"coachNotes":"Short, sharp sessions. Swim: 1200m. Bike: 50km easy. Run: 10km with race pace efforts.","days":[{"date":"2027-01-17","dayOfWeek":"Sunday","workouts":[{"id":"w33-sun","sport":"training","type":"training","name":"Training Day 7","description":"Maintain intensity, reduce volume. Swim: 1800m race sets. Bike: 70km. Run: 15km.","completed":false}]},{"date":"2027-01-18","dayOfWeek":"Monday","workouts":[{"id":"w34-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-01-19","dayOfWeek":"Tuesday","workouts":[{"id":"w34-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-20","dayOfWeek":"Wednesday","workouts":[{"id":"w34-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-21","dayOfWeek":"Thursday","workouts":[{"id":"w34-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-22","dayOfWeek":"Friday","workouts":[{"id":"w34-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-23","dayOfWeek":"Saturday","workouts":[{"id":"w34-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":5.5,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":35,"startDate":"2027-01-24","endDate":"2027-01-30","phase":"70.3 Peak & Taper","phaseId":7,"focus":"Race Week \u2014 Ironman 70.3","targetHours":2,"isRecoveryWeek":true,"coachNotes":"Mon: Rest. Tue: 600m easy swim. Wed: 20min run. Thu-Fri: Rest. Sat: \ud83c\udfc1 IRONMAN 70.3 RACE DAY","days":[{"date":"2027-01-24","dayOfWeek":"Sunday","workouts":[{"id":"w34-sun","sport":"training","type":"training","name":"Training Day 7","description":"Short, sharp sessions. Swim: 1200m. Bike: 50km easy. Run: 10km with race pace efforts.","completed":false}]},{"date":"2027-01-25","dayOfWeek":"Monday","workouts":[{"id":"w35-mon","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-01-26","dayOfWeek":"Tuesday","workouts":[{"id":"w35-tue","sport":"training","type":"training","name":"Training Day 2","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-27","dayOfWeek":"Wednesday","workouts":[{"id":"w35-wed","sport":"training","type":"training","name":"Training Day 3","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-28","dayOfWeek":"Thursday","workouts":[{"id":"w35-thu","sport":"training","type":"training","name":"Training Day 4","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-29","dayOfWeek":"Friday","workouts":[{"id":"w35-fri","sport":"training","type":"training","name":"Training Day 5","description":"See coach notes for this week","completed":false}]},{"date":"2027-01-30","dayOfWeek":"Saturday","workouts":[{"id":"w35-sat","sport":"training","type":"training","name":"Training Day 6","description":"See coach notes for this week","completed":false}]}],"summary":{"totalHours":2,"note":"Detailed workouts follow phase structure in coach notes"},"preferences":{"firstDayOfWeek":"sunday"}},{"weekNumber":36,"startDate":"2027-01-31","endDate":"2027-02-06","phase":"70.3 Peak & Taper","phaseId":7,"focus":"\ud83c\udfc1 IRONMAN 70.3 RACE DAY \u2014 Feb 14, 2027","targetHours":6,"isRecoveryWeek":false,"days":[{"date":"2027-01-31","dayOfWeek":"Sunday","workouts":[{"id":"w35-sun","sport":"training","type":"training","name":"Training Day 7","description":"Mon: Rest. Tue: 600m easy swim. Wed: 20min run. Thu-Fri: Rest. Sat: \ud83c\udfc1 IRONMAN 70.3 RACE DAY","completed":false}]},{"date":"2027-02-01","dayOfWeek":"Monday","workouts":[{"id":"w36-race-0","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-02-02","dayOfWeek":"Tuesday","workouts":[{"id":"w36-race-1","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-02-03","dayOfWeek":"Wednesday","workouts":[{"id":"w36-race-2","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-02-04","dayOfWeek":"Thursday","workouts":[{"id":"w36-race-3","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-02-05","dayOfWeek":"Friday","workouts":[{"id":"w36-race-4","sport":"rest","type":"rest","name":"Rest","description":"Rest","completed":false}]},{"date":"2027-02-06","dayOfWeek":"Saturday","workouts":[{"id":"w36-race-5","sport":"race","type":"race","name":"\ud83c\udfc1 IRONMAN 70.3 RACE DAY \u2014 Feb 14","description":"SWIM 1900m: Controlled start. Sight every 6. Minimal kick.\nBIKE 90km: First 20 min Zone 2. Ride at 70-75% FTP / HR 140-150. Eat 60-80g carbs/hr.\nRUN 21km: First 3km easy. Build to pace by km 5. Aid stations every 1-2km.\n\nYOU WENT FROM 50m TO 70.3. THIS IS YOUR DAY.","completed":false}]}],"summary":{"totalHours":5.5},"preferences":{"firstDayOfWeek":"sunday"}}]};
+
+// ── SPORT CONFIG ──
+const SP={
+  swim:{e:'🏊',cls:'si-swim',color:'var(--swim)'},
+  bike:{e:'🚴',cls:'si-bike',color:'var(--bike)'},
+  run:{e:'🏃',cls:'si-run',color:'var(--run)'},
+  rest:{e:'😴',cls:'si-rest',color:'var(--rest)'},
+  race:{e:'🏁',cls:'si-race',color:'var(--race)'},
+  training:{e:'💪',cls:'si-train',color:'var(--train)'}
+};
+function sp(s){return SP[s]||SP.training}
+
+const PH_COLORS=['#00d4ff','#3a9fff','#ff7240','#ffc940','#a78bfa','#ec4899','#ffc940'];
+function phColor(id){return PH_COLORS[(id||1)-1]||'#8888aa'}
+
+// ── STORAGE ──
+let done={};
+try{done=JSON.parse(localStorage.getItem('done')||'{}')}catch{}
+function saveDone(){try{localStorage.setItem('done',JSON.stringify(done))}catch{}}
+function toggle(id){done[id]=!done[id];saveDone();return done[id]}
+function isDone(id){return!!done[id]}
+
+// ── DATE ──
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
+}
+function daysTo(iso){
+  const n=new Date();n.setHours(0,0,0,0);
+  return Math.ceil((new Date(iso+'T00:00:00')-n)/86400000)
+}
+function fmtDate(iso){
+  return new Date(iso+'T00:00:00').toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'})
+}
+function curWeek(){
+  const td=todayStr();
+  return PLAN.weeks.find(w=>w.startDate<=td&&w.endDate>=td)||PLAN.weeks[0]
+}
+function todayDay(){
+  const td=todayStr(),wk=curWeek();
+  return wk&&wk.days?wk.days.find(d=>d.date===td):null
+}
+
+// ── NAV ──
+let curPage='today';
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+page).classList.add('active');
+  document.querySelector('[data-page="'+page+'"]').classList.add('active');
+  document.getElementById('scroller').scrollTop=0;
+  curPage=page;
+  if(page==='today')renderToday();
+  else if(page==='weeks')renderWeeks();
+  else if(page==='phases')renderPhases();
+  else if(page==='races')renderRaces();
+  else if(page==='profile')renderProfile();
+}
+
+// ── SHEET ──
+let sheetWo=null;
+function openSheet(wo){
+  sheetWo=wo;
+  const s=sp(wo.sport);
+  const b=document.getElementById('sh-badge');
+  b.className='sheet-sport-badge '+s.cls;
+  b.textContent=s.e;
+  document.getElementById('sh-title').textContent=wo.name;
+  const metas=[];
+  if(wo.durationMinutes)metas.push(wo.durationMinutes+'min');
+  if(wo.distanceKm)metas.push(wo.distanceKm+'km');
+  if(wo.distanceMeters)metas.push(wo.distanceMeters+'m');
+  if(wo.primaryZone)metas.push(wo.primaryZone);
+  document.getElementById('sh-meta').innerHTML=metas.map(m=>`<div class="sheet-tag">${m}</div>`).join('');
+  const desc=document.getElementById('sh-desc');
+  desc.textContent=wo.description||'';
+  desc.style.display=wo.description?'block':'none';
+  const instr=document.getElementById('sh-instr');
+  const txt=wo.humanReadable||wo.coachNotes||'';
+  instr.textContent=txt;
+  instr.style.display=txt?'block':'none';
+  const btn=document.getElementById('sh-btn');
+  if(wo.sport==='rest'){btn.style.display='none'}
+  else{
+    btn.style.display='block';
+    const d=isDone(wo.id);
+    btn.textContent=d?'✓ Completed — Tap to Undo':'Mark as Done';
+    btn.className='sheet-btn '+(d?'unmark':'mark');
+  }
+  document.getElementById('modal-scrim').classList.add('open');
+}
+function closeSheet(e){
+  if(!e||e.target===document.getElementById('modal-scrim')){
+    document.getElementById('modal-scrim').classList.remove('open');
+    if(curPage==='today')renderToday();
+    else if(curPage==='weeks')renderWeeks();
+  }
+}
+function toggleFromSheet(){
+  if(!sheetWo)return;
+  toggle(sheetWo.id);
+  const d=isDone(sheetWo.id);
+  const btn=document.getElementById('sh-btn');
+  btn.textContent=d?'✓ Completed — Tap to Undo':'Mark as Done';
+  btn.className='sheet-btn '+(d?'unmark':'mark');
+}
+
+// ── WO CARD HTML ──
+function woCardHtml(wo){
+  const s=sp(wo.sport);
+  const d=isDone(wo.id);
+  const metas=[];
+  if(wo.durationMinutes)metas.push(wo.durationMinutes+' min');
+  if(wo.distanceKm)metas.push(wo.distanceKm+' km');
+  if(wo.distanceMeters)metas.push(wo.distanceMeters+' m');
+  if(wo.primaryZone)metas.push(wo.primaryZone);
+  const safeWo=JSON.stringify(wo).replace(/\\/g,'\\\\').replace(/`/g,'\`');
+  return `<div class="wo-card${d?' done':''}" onclick="openSheet(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(wo))}')))" >
+    <div class="wo-accent" style="background:${s.color}"></div>
+    <div class="wo-card-inner">
+      <div class="sport-icon ${s.cls}">${s.e}</div>
+      <div class="wo-info">
+        <div class="wo-name">${wo.name}</div>
+        <div class="wo-meta">${metas.map((m,i)=>i?`<span class="wo-sep"></span><span class="wo-tag">${m}</span>`:`<span class="wo-tag">${m}</span>`).join('')}</div>
+      </div>
+      <button class="check-btn${d?' done-c':''}" onclick="event.stopPropagation();toggle('${wo.id}');renderToday();">${d?'✓':''}</button>
+    </div>
+  </div>`;
+}
+
+// ── RENDER TODAY ──
+function renderToday(){
+  const td=todayStr(),wk=curWeek(),day=todayDay();
+  const r1=daysTo('2026-11-08'),r2=daysTo('2027-02-14');
+  const color=wk?phColor(wk.phaseId):'#8888aa';
+  const pct=wk?Math.min(100,Math.round(((wk.weekNumber-1)/PLAN.weeks.length)*100)):0;
+
+  let h=`
+  <div class="hero">
+    <div class="hero-glow"></div><div class="hero-glow2"></div>
+    <div class="hero-greeting">Today · ${fmtDate(td)}</div>
+    <div class="hero-title">Let's <span>Train</span></div>`;
+
+  if(wk){
+    h+=`<div class="phase-chip">
+      <span class="phase-dot" style="background:${color}"></span>
+      ${wk.phase} · Week ${wk.weekNumber}${wk.isRecoveryWeek?' · Recovery':''}
+    </div>`;
+  }
+  h+=`</div>`;
+
+  // Countdown
+  h+=`<div class="countdown-row">
+    <div class="cd-pill r1">
+      <div class="cd-days">${r1>0?r1:'🏁'}</div>
+      <div class="cd-label">Days to</div>
+      <div class="cd-name">Olympic Tri · Nov 8</div>
+    </div>
+    <div class="cd-pill r2">
+      <div class="cd-days">${r2>0?r2:'🏁'}</div>
+      <div class="cd-label">Days to</div>
+      <div class="cd-name">Ironman 70.3 · Feb 14</div>
+    </div>
+  </div>`;
+
+  // Progress bar
+  if(wk){
+    h+=`<div class="prog-wrap">
+      <div class="prog-row"><span class="prog-label">Season Progress</span><span class="prog-val">Week ${wk.weekNumber} of ${PLAN.weeks.length}</span></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-phases">${PLAN.phases.map(p=>`<div class="prog-phase-seg" style="background:${phColor(p.id)};flex:${p.weeks.includes('-')?parseInt(p.weeks.split('-')[1])-parseInt(p.weeks.split('-')[0])+1:1}"></div>`).join('')}</div>
+    </div>`;
+  }
+
+  // Sleep nudge
+  h+=`<div class="sleep-nudge">
+    <div class="sleep-icon">🌙</div>
+    <div class="sleep-text">
+      <div class="sleep-t">TARGET 7.5 HRS SLEEP</div>
+      <div class="sleep-s">82 min daily debt from WHOOP. Sleep is your #1 performance gain.</div>
+    </div>
+  </div>`;
+
+  // Workouts
+  h+=`<div class="sec">Today's Sessions</div>`;
+  if(day&&day.workouts&&day.workouts.length){
+    day.workouts.forEach(wo=>{h+=woCardHtml(wo)});
+  } else {
+    h+=`<div class="no-workouts">No training data for today.<br>Check the Weeks tab for your schedule.</div>`;
+  }
+
+  document.getElementById('p-today').innerHTML=h;
+}
+
+// ── RENDER WEEKS ──
+function renderWeeks(){
+  const td=todayStr();
+  let h='<div class="week-list">';
+  PLAN.weeks.forEach(wk=>{
+    const cur=wk.startDate<=td&&wk.endDate>=td;
+    const c=phColor(wk.phaseId);
+    h+=`<div class="week-item${cur?' current':''}" id="wi-${wk.weekNumber}">
+      <div class="week-hdr" onclick="toggleWk(${wk.weekNumber})">
+        <div class="week-num-badge">${wk.weekNumber}</div>
+        <div class="week-hdr-info">
+          <div class="week-hdr-phase" style="color:${c}">${wk.phase}</div>
+          <div class="week-hdr-focus">${wk.focus}</div>
+        </div>
+        <div class="week-hdr-right">
+          <div class="week-hrs" style="color:${c}">${wk.targetHours}h</div>
+          <div class="week-date-small">${wk.startDate.slice(5)}</div>
+          ${wk.isRecoveryWeek?'<div class="rec-tag">Recovery</div>':''}
+        </div>
+      </div>`;
+
+    const hasDetail=wk.days&&wk.days.some(d=>d.workouts&&d.workouts.length);
+    if(hasDetail||wk.coachNotes){
+      h+=`<div class="week-body${cur?' open':''}" id="wb-${wk.weekNumber}">`;
+      if(wk.days){
+        wk.days.forEach(day=>{
+          const wos=day.workouts||[];
+          h+=`<div class="day-block"><div class="day-lbl">${day.dayOfWeek.slice(0,3)}</div>`;
+          wos.forEach(wo=>{
+            const s=sp(wo.sport);
+            const dur=wo.durationMinutes?wo.durationMinutes+'m':'';
+            h+=`<div class="wo-pill" onclick="openSheet(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(wo))}')))" >
+              <span class="pill-emoji">${s.e}</span>
+              <span class="pill-name">${wo.name}</span>
+              <span class="pill-dur">${dur}</span>
+              ${isDone(wo.id)?'<span class="pill-done">✓</span>':''}
+            </div>`;
+          });
+          h+=`</div>`;
+        });
+      } else if(wk.coachNotes){
+        h+=`<div style="font-size:13px;color:var(--tx2);line-height:1.7;padding:4px 0">${wk.coachNotes}</div>`;
+      }
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  });
+  h+='</div>';
+  document.getElementById('p-weeks').innerHTML=h;
+  // scroll to current
+  setTimeout(()=>{
+    const el=document.querySelector('.week-item.current');
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'})}
+  },100);
+}
+function toggleWk(n){
+  const el=document.getElementById('wb-'+n);
+  if(el)el.classList.toggle('open');
+}
+
+// ── RENDER PHASES ──
+function renderPhases(){
+  let h='<div class="phases-wrap">';
+  PLAN.phases.forEach(p=>{
+    const c=phColor(p.id);
+    const wkRange=p.weeks;
+    h+=`<div class="phase-card" onclick="togglePhase(${p.id})">
+      <div class="phase-top">
+        <div class="phase-circle" style="background:${c}18;font-size:22px">${p.emoji}</div>
+        <div class="phase-info">
+          <div class="phase-name-txt">${p.name}</div>
+          <div class="phase-dates-txt">${p.dates} · Wks ${wkRange}</div>
+        </div>
+        <div class="phase-wks-badge" style="background:${c}18;color:${c}">${typeof p.weeklyHours==='object'?(p.weeklyHours.total||''):p.weeklyHours||''}</div>
+      </div>
+      <div class="phase-detail" id="pd-${p.id}">
+        <div class="phase-focus-txt">${p.focus}</div>
+        <div class="milestone-pill">
+          <div class="ms-icon">🎯</div>
+          <div class="ms-text"><strong>Milestone:</strong> ${p.keyMilestone}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  h+='</div>';
+  document.getElementById('p-phases').innerHTML=h;
+}
+function togglePhase(id){
+  document.getElementById('pd-'+id).classList.toggle('open');
+}
+
+// ── RENDER RACES ──
+function renderRaces(){
+  const r1=daysTo('2026-11-08'),r2=daysTo('2027-02-14');
+  let h='<div class="races-wrap">';
+
+  // Race 1
+  h+=`<div class="race-card" style="border:1px solid rgba(255,201,64,.25)">
+    <div class="race-card-bg" style="background:linear-gradient(135deg,#1a1505,#0e0e14)">
+      <span class="race-emoji">🥇</span>
+      <div class="race-name" style="color:var(--race)">Olympic Triathlon</div>
+      <div class="race-countdown-inline" style="color:var(--race)">${r1>0?r1+' days away':'Race Day!'} · Nov 8, 2026</div>
+      <div class="race-dists">
+        <div class="rdist"><span>🏊</span> 1500m</div>
+        <div class="rdist"><span>🚴</span> 40km</div>
+        <div class="rdist"><span>🏃</span> 10km</div>
+      </div>
+    </div>
+  </div>
+  <div class="strat-section">
+    <div class="strat-hdr">Race Strategy</div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🏊</span><span class="strat-sport-name" style="color:var(--swim)">Swim · 1500m</span></div>
+      <div class="strat-body"><strong>Pace:</strong> ~2:15–2:20/100m<br><strong>Start:</strong> Conservative — find rhythm by 300m<br><strong>Breathe:</strong> Every 3 strokes · Sight every 6<br><strong>Kick:</strong> Minimal — save legs for bike+run</div>
+    </div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🚴</span><span class="strat-sport-name" style="color:var(--bike)">Bike · 40km</span></div>
+      <div class="strat-body"><strong>Target HR:</strong> 145–155 bpm<br><strong>First 10 min:</strong> Zone 2 — let body settle<br><strong>Fuel:</strong> 1 gel at 20km · 500ml water/hr</div>
+    </div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🏃</span><span class="strat-sport-name" style="color:var(--run)">Run · 10km</span></div>
+      <div class="strat-body"><strong>Pace:</strong> 5:00–5:20/km<br><strong>First 2km:</strong> Will feel terrible — that's normal<br><strong>Build:</strong> Race pace by km 3 · Push final 2km</div>
+    </div>
+    <div class="strat-card" style="border-color:rgba(255,100,100,.2)">
+      <div class="strat-sport-row"><span style="font-size:18px">🌡️</span><span class="strat-sport-name">Muscat Heat (30–34°C)</span></div>
+      <div class="strat-body"><strong>Fluid:</strong> 600–750ml/hr — don't skip aid stations<br><strong>Electrolytes:</strong> Every drink<br><strong>Ice:</strong> Use at every aid station available</div>
+    </div>
+  </div>`;
+
+  // Race 2
+  h+=`<div class="race-card" style="border:1px solid rgba(0,212,255,.2);margin-top:4px">
+    <div class="race-card-bg" style="background:linear-gradient(135deg,#020e14,#060c12)">
+      <span class="race-emoji">🏆</span>
+      <div class="race-name" style="color:var(--swim)">Ironman 70.3</div>
+      <div class="race-countdown-inline" style="color:var(--swim)">${r2>0?r2+' days away':'Race Day!'} · Feb 14, 2027</div>
+      <div class="race-dists">
+        <div class="rdist"><span>🏊</span> 1900m</div>
+        <div class="rdist"><span>🚴</span> 90km</div>
+        <div class="rdist"><span>🏃</span> 21.1km</div>
+      </div>
+    </div>
+  </div>
+  <div class="strat-section">
+    <div class="strat-hdr">Race Strategy</div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🏊</span><span class="strat-sport-name" style="color:var(--swim)">Swim · 1900m</span></div>
+      <div class="strat-body"><strong>Pace:</strong> Controlled — 10% below CSS<br><strong>Kick:</strong> Minimal 2-beat — save legs for 90km bike<br><strong>Draft:</strong> Find feet in first 100m</div>
+    </div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🚴</span><span class="strat-sport-name" style="color:var(--bike)">Bike · 90km</span></div>
+      <div class="strat-body"><strong>Target HR:</strong> 140–150 bpm<br><strong>Fuel:</strong> 60–80g carbs/hr from km 20<br><strong>Fluid:</strong> 600ml/hr — even pacing over 2.5–3hrs</div>
+    </div>
+    <div class="strat-card">
+      <div class="strat-sport-row"><span style="font-size:18px">🏃</span><span class="strat-sport-name" style="color:var(--run)">Run · 21km</span></div>
+      <div class="strat-body"><strong>Pace:</strong> 5:30–6:00/km<br><strong>First 3km:</strong> Easy — build by km 5<br><strong>Aid stations:</strong> Walk + drink every stop<br><strong>Final 5km:</strong> Everything you have left</div>
+    </div>
+    <div class="strat-card" style="border-color:rgba(0,240,122,.15)">
+      <div class="strat-sport-row"><span style="font-size:18px">🍌</span><span class="strat-sport-name" style="color:var(--run)">Nutrition Plan</span></div>
+      <div class="strat-body"><strong>Pre-race (3hr):</strong> Oats + banana + dates (100g carbs)<br><strong>Swim:</strong> Nothing<br><strong>Bike:</strong> Gel every 25min + water each station<br><strong>T2:</strong> Gel leaving transition<br><strong>Run:</strong> Gel every 4km + cola at stations</div>
+    </div>
+  </div></div>`;
+
+  document.getElementById('p-races').innerHTML=h;
+}
+
+// ── RENDER PROFILE ──
+function renderProfile(){
+  const wp=PLAN.whoopProfile||{};
+  let h=`<div class="profile-wrap">
+  <div class="profile-hero">
+    <div class="profile-av">🏊</div>
+    <div class="profile-name">Harith Alnabhani</div>
+    <div class="profile-sub">MUSCAT, OMAN · OLYMPIC + IRONMAN 70.3</div>
+  </div>
+  <div class="stat4">
+    <div class="stat4-cell"><div class="stat4-v" style="color:var(--swim)">36</div><div class="stat4-l">Total Weeks</div></div>
+    <div class="stat4-cell"><div class="stat4-v" style="color:var(--run)">2</div><div class="stat4-l">Races</div></div>
+    <div class="stat4-cell"><div class="stat4-v" style="color:var(--race)">${wp.avgHRV||109}</div><div class="stat4-l">Avg HRV ms</div></div>
+    <div class="stat4-cell"><div class="stat4-v" style="color:var(--bike)">${wp.avgRHR||48}</div><div class="stat4-l">Resting HR</div></div>
+  </div>
+  <div class="info-block">
+    <div class="info-block-title">💚 WHOOP Profile</div>
+    <div class="info-row"><span class="info-lbl">HRV Average</span><span class="info-val" style="color:var(--run)">${wp.avgHRV||109} ms</span></div>
+    <div class="info-row"><span class="info-lbl">Resting HR</span><span class="info-val">${wp.avgRHR||48} bpm</span></div>
+    <div class="info-row"><span class="info-lbl">Recovery Score</span><span class="info-val" style="color:#ffc940">${wp.avgRecovery||64}%</span></div>
+    <div class="info-row"><span class="info-lbl">Avg Sleep</span><span class="info-val" style="color:#ff6b6b">${wp.avgSleepHrs||6.1} hrs</span></div>
+    <div class="info-row"><span class="info-lbl">Daily Sleep Debt</span><span class="info-val" style="color:#ff6b6b">82 min</span></div>
+    <div class="info-row"><span class="info-lbl">Est. Max HR</span><span class="info-val">${wp.estimatedMaxHR||183} bpm</span></div>
+    <div class="info-row"><span class="info-lbl">Est. LTHR (Run)</span><span class="info-val">${wp.estimatedLTHR_run||165} bpm</span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-block-title">📊 Training Zones</div>
+    <div class="info-row"><span class="info-lbl">Run Z1 Recovery</span><span class="info-val">&lt;134 bpm</span></div>
+    <div class="info-row"><span class="info-lbl">Run Z2 Aerobic</span><span class="info-val" style="color:var(--run)">134–147</span></div>
+    <div class="info-row"><span class="info-lbl">Run Z3 Tempo</span><span class="info-val" style="color:#ffc940">147–154</span></div>
+    <div class="info-row"><span class="info-lbl">Run Z4 Threshold</span><span class="info-val" style="color:var(--bike)">154–165</span></div>
+    <div class="info-row"><span class="info-lbl">Bike Z2 Aerobic</span><span class="info-val" style="color:var(--run)">132–145</span></div>
+    <div class="info-row"><span class="info-lbl">Bike Z3 Tempo</span><span class="info-val" style="color:#ffc940">145–155</span></div>
+    <div class="info-row"><span class="info-lbl">Bike Z4 Threshold</span><span class="info-val" style="color:var(--bike)">155–165</span></div>
+    <div class="info-row"><span class="info-lbl">Swim CSS (est.)</span><span class="info-val" style="color:var(--swim)">~2:10/100m</span></div>
+  </div>
+  </div>`;
+  document.getElementById('p-profile').innerHTML=h;
+}
+
+// ── INIT ──
+renderToday();
+</script>
+</body>
+</html>
